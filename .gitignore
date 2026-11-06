@@ -1,0 +1,10 @@
+﻿*.cache
+*.csproj.user
+*.sln.DotSettings.user
+.vs/
+packages/
+**/bin/
+**/obj/
+AutoRepair/dist/
+AutoRepair/Thunderstore/*.zip
+AutoRepair/Thunderstore/plugins/

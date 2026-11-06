@@ -1,0 +1,7 @@
+{
+    "name": "AutoRepair",
+    "description": "Automatically repairs equipment eligible at the current crafting station.",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/dhamhuis/ValheimMods",
+    "dependencies": ["denikson-BepInExPack_Valheim-5.4.2360"]
+}

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>Valheim-inspired dark carved wood frame</title>
+  <desc>Original reusable square icon frame with transparent center, carved wood grain, and iron corner pegs.</desc>
+  <defs>
+    <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#65452d"/>
+      <stop offset="0.34" stop-color="#3c291b"/>
+      <stop offset="0.68" stop-color="#513621"/>
+      <stop offset="1" stop-color="#24180f"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d4a36a"/>
+      <stop offset="0.5" stop-color="#805532"/>
+      <stop offset="1" stop-color="#2a1c12"/>
+    </linearGradient>
+    <linearGradient id="iron" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b9aa89"/>
+      <stop offset="0.45" stop-color="#605a4c"/>
+      <stop offset="1" stop-color="#211f1a"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="7"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.65"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <mask id="opening" maskUnits="userSpaceOnUse">
+      <rect width="512" height="512" fill="#fff"/>
+      <rect x="91" y="91" width="330" height="330" rx="41" fill="#000"/>
+    </mask>
+  </defs>
+  <g mask="url(#opening)" filter="url(#shadow)">
+    <rect x="0" y="0" width="512" height="512" rx="76" fill="#090806" stroke="#120d09" stroke-width="8"/>
+    <rect x="8" y="8" width="496" height="496" rx="68" fill="url(#wood)" stroke="#1c120b" stroke-width="12"/>
+    <rect x="22" y="22" width="468" height="468" rx="58" fill="none" stroke="url(#edge)" stroke-width="6"/>
+    <rect x="35" y="35" width="442" height="442" rx="50" fill="none" stroke="#21150d" stroke-width="8"/>
+    <rect x="48" y="48" width="416" height="416" rx="42" fill="none" stroke="#805a38" stroke-width="4"/>
+    <rect x="58" y="58" width="396" height="396" rx="38" fill="none" stroke="#d5a56d" stroke-opacity="0.55" stroke-width="2"/>
+    <g fill="none" stroke="#d2a06a" stroke-opacity="0.3" stroke-width="3" stroke-linecap="round">
+      <path d="M132 45 C165 55 187 53 220 45 M289 47 C324 56 353 53 382 44"/>
+      <path d="M133 467 C166 456 189 459 219 467 M290 466 C322 457 352 460 382 468"/>
+      <path d="M45 134 C55 165 53 189 45 220 M46 290 C56 323 53 350 45 381"/>
+      <path d="M467 133 C457 165 459 190 467 221 M466 289 C456 322 459 350 467 382"/>
+    </g>
+    <g fill="none" stroke="#170f09" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M73 151 C95 149 104 136 106 113 C128 111 142 101 151 77 M77 361 C99 363 107 376 108 399 C130 402 141 411 151 435"/>
+      <path d="M439 151 C417 149 408 136 406 113 C384 111 370 101 361 77 M435 361 C413 363 405 376 404 399 C382 402 371 411 361 435"/>
+    </g>
+    <g fill="none" stroke="#c79762" stroke-opacity="0.78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M75 143 C99 140 109 125 112 102 C133 101 145 91 157 68 M81 369 C103 372 115 386 116 410 C137 411 149 421 159 444"/>
+      <path d="M437 143 C413 140 403 125 400 102 C379 101 367 91 355 68 M431 369 C409 372 397 386 396 410 C375 411 363 421 353 444"/>
+    </g>
+    <g fill="url(#iron)" stroke="#18140f" stroke-width="4">
+      <circle cx="75" cy="75" r="11"/><circle cx="437" cy="75" r="11"/>
+      <circle cx="75" cy="437" r="11"/><circle cx="437" cy="437" r="11"/>
+    </g>
+    <g fill="#e0c596" fill-opacity="0.8">
+      <circle cx="72" cy="72" r="2.5"/><circle cx="434" cy="72" r="2.5"/>
+      <circle cx="72" cy="434" r="2.5"/><circle cx="434" cy="434" r="2.5"/>
+    </g>
+  </g>
+</svg>
