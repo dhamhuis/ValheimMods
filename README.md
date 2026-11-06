@@ -1,23 +1,19 @@
-# AutoRepair
+# ValheimMods
 
-Standalone development workspace for AutoRepair, a BepInEx plugin that invokes Valheim's normal repair checks when a usable crafting station is opened.
+Valheim mods by dhamhuis, developed as focused BepInEx plugins.
 
-## Build and test
+## Mods
 
-Valheim runs Unity Mono under BepInEx 5. The plugin targets `netstandard2.1` to match the installed game's Unity assemblies; it is not a .NET Core application.
+| Mod | Purpose |
+| --- | --- |
+| [AutoRepair](AutoRepair/README.md) | Repairs eligible inventory equipment when you interact with a crafting station. |
 
-Prerequisites: .NET SDK, Steam Valheim, and a r2modman Valheim profile with BepInExPack installed.
+## Development
 
-```powershell
-.\AutoRepair\scripts\build.ps1
-.\AutoRepair\scripts\build.ps1 -Deploy
-.\AutoRepair\scripts\pack.ps1
-```
+[ValheimMods.sln](ValheimMods.sln) contains the mod projects. Each mod keeps source in `src/`, command wrappers in `scripts/`, and its player-facing package files in `Thunderstore/`. Shared build and packaging tools live in the root `scripts/` folder.
 
-Override paths when needed with `-ValheimInstallDir`, `-BepInExCoreDir`, and `-R2ModmanProfileDir`. Build output is in `AutoRepair\dist`; package metadata and the per-mod icon are in `AutoRepair\Thunderstore`. The archive contains only the plugin DLL and package files; packaging does not upload to Thunderstore.
+See the [build, deployment, and packaging guide](docs/Development.md) for prerequisites, commands, and testing. Packaging creates a local ZIP; it does not publish a release.
 
-Author: dhamhuis
+## Artwork
 
-## Mod icons
-
-The reusable dark carved-wood frame source is `assets/icons/valheim-wood-frame.svg`. `AutoRepair/assets/icon.svg` shows the AutoRepair composition; each mod keeps its own 256×256 PNG in its `Thunderstore` folder.
+The [carved-wood frame](assets/icons/valheim-wood-frame.svg) is shared across mod icons. Each mod owns its composition, such as [AutoRepair's icon source](AutoRepair/assets/icon.svg), and its 256x256 package PNG.
