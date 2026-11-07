@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\src\NearbyStorage.cs" Link="Production\NearbyStorage.cs" />
+    <Compile Include="..\src\CraftingContext.cs" Link="Production\CraftingContext.cs" />
+    <Compile Include="..\src\IngredientPlan.cs" Link="Production\IngredientPlan.cs" />
+    <Compile Include="..\src\StorageCrafting.cs" Link="Production\StorageCrafting.cs" />
+    <Compile Include="..\src\*Patch.cs" Link="Production\%(Filename)%(Extension)" />
+    <ProjectReference Include="..\..\tests\ValheimMods.Testing\ValheimMods.Testing.csproj" />
+    <PackageReference Include="HarmonyX" Version="2.16.1" />
+  </ItemGroup>
+</Project>

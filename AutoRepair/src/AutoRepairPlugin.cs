@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -14,8 +14,9 @@ public sealed class AutoRepairPlugin : BaseUnityPlugin
     public const string PluginGuid = PluginAuthor + ".valheim.autorepair";
     public const string PluginVersion = "1.0.0";
 
-    internal static ManualLogSource Log { get; private set; }
     private Harmony _harmony;
+
+    internal static ManualLogSource Log { get; private set; }
 
     private void Awake()
     {
@@ -29,10 +30,9 @@ public sealed class AutoRepairPlugin : BaseUnityPlugin
             [typeof(Humanoid), typeof(bool), typeof(bool)]);
 
         var patchInfo = target == null ? null : Harmony.GetPatchInfo(target);
-
         bool registered = patchInfo?.Postfixes.Any(patch =>
-            patch.owner == PluginGuid &&
-            patch.PatchMethod.DeclaringType == typeof(CraftingStationRepairPatch)) == true;
+            patch.owner == PluginGuid
+            && patch.PatchMethod.DeclaringType == typeof(CraftingStationRepairPatch)) == true;
 
         if (!registered)
         {
@@ -48,6 +48,7 @@ public sealed class AutoRepairPlugin : BaseUnityPlugin
     private void OnDestroy()
     {
         _harmony?.UnpatchSelf();
+
         if (ReferenceEquals(Log, Logger))
         {
             Log = null;

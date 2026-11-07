@@ -5,6 +5,7 @@
 packages/
 **/bin/
 **/obj/
-AutoRepair/dist/
 AutoRepair/Thunderstore/*.zip
 AutoRepair/Thunderstore/plugins/
+CraftFromStorage/Thunderstore/*.zip
+CraftFromStorage/Thunderstore/plugins/

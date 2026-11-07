@@ -48,17 +48,57 @@ $distDirectory = Join-Path $modRoot 'dist'
 $archivePath = Join-Path $distDirectory "$($manifest.name)-$($manifest.version_number).zip"
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-if (Test-Path -LiteralPath $archivePath) { Remove-Item -LiteralPath $archivePath -Force }
-$archive = [System.IO.Compression.ZipFile]::Open($archivePath, [System.IO.Compression.ZipArchiveMode]::Create)
+$temporaryPath = Join-Path $distDirectory (".$($manifest.name)-$([guid]::NewGuid()).tmp")
+$files = [ordered]@{
+    'manifest.json' = $manifestPath
+    'README.md' = (Join-Path $packageDirectory 'README.md')
+    'icon.png' = (Join-Path $packageDirectory 'icon.png')
+    'CHANGELOG.md' = (Join-Path $modRoot 'CHANGELOG.md')
+    "plugins/$assemblyName.dll" = $pluginDll
+}
 try {
-    foreach ($fileName in @('manifest.json', 'README.md', 'icon.png')) {
-        [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, (Join-Path $packageDirectory $fileName), $fileName, [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
+    $archive = [System.IO.Compression.ZipFile]::Open($temporaryPath, [System.IO.Compression.ZipArchiveMode]::Create)
+    try {
+        foreach ($entry in $files.GetEnumerator()) {
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $entry.Value, $entry.Key, [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
+        }
     }
-    [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, (Join-Path $modRoot 'CHANGELOG.md'), 'CHANGELOG.md', [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
-    [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $pluginDll, "plugins/$assemblyName.dll", [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
+    finally {
+        $archive.Dispose()
+    }
+
+    $archive = [System.IO.Compression.ZipFile]::OpenRead($temporaryPath)
+    try {
+        if ($archive.Entries.Count -ne $files.Count) { throw 'Unexpected package entry count.' }
+        foreach ($entry in $files.GetEnumerator()) {
+            $archived = $archive.GetEntry($entry.Key)
+            if (-not $archived -or $archived.Length -eq 0) { throw "Missing or empty package entry: $($entry.Key)" }
+            $stream = $archived.Open()
+            $hash = [System.Security.Cryptography.SHA256]::Create()
+            try {
+                $actualHash = [BitConverter]::ToString($hash.ComputeHash($stream)).Replace('-', '')
+                $expectedHash = (Get-FileHash -LiteralPath $entry.Value -Algorithm SHA256).Hash
+                if ($actualHash -ne $expectedHash) { throw "Package entry differs from its source: $($entry.Key)" }
+            }
+            finally {
+                $hash.Dispose()
+                $stream.Dispose()
+            }
+        }
+    }
+    finally {
+        $archive.Dispose()
+    }
+
+    if (Test-Path -LiteralPath $archivePath) {
+        [System.IO.File]::Replace($temporaryPath, $archivePath, [NullString]::Value)
+    }
+    else {
+        [System.IO.File]::Move($temporaryPath, $archivePath)
+    }
 }
 finally {
-    $archive.Dispose()
+    if (Test-Path -LiteralPath $temporaryPath) { Remove-Item -LiteralPath $temporaryPath -Force }
 }
 
 Write-Output "Created $archivePath"

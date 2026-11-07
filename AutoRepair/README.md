@@ -8,7 +8,7 @@ The [Thunderstore README](Thunderstore/README.md) is the player-facing page incl
 
 | Aspect | Behavior |
 | --- | --- |
-| Trigger | Postfix on `CraftingStation.Interact` for the local player. |
+| Trigger | Postfix on a non-held `CraftingStation.Interact` for the local player, only when the interacted station is now the player's current station. |
 | Items | Damaged inventory items, including unequipped equipment, eligible under vanilla repair checks. |
 | Station rules | Uses `InventoryGui.HaveRepairableItems()` and `RepairOneItem()` for the current station's eligibility and usability rules. |
 | Example | Forge-only iron gear is not repaired at a workbench. |
@@ -26,5 +26,11 @@ Startup logs distinguish a loaded plugin from a verified repair patch. Repair lo
 ## Development and testing
 
 See the [development guide](../docs/Development.md) for building, deployment, and package creation. Runtime changes should be checked with broken, partially damaged, and undamaged gear; wrong-station equipment; and unusable stations. Compilation alone does not verify Harmony behavior in-game.
+
+The [AutoRepair integration tests](tests/Integration/StationInteractionTests.cs) exercise held, rejected, remote-player and successful station interactions using HarmonyX and game stubs. Run them with `dotnet run --project .\AutoRepair\tests\AutoRepair.Tests.csproj --configuration Release` from the repository root.
+
+The test project separates `Integration/` and `TestDoubles/` and uses the independent [ValheimMods.Testing](../tests/ValheimMods.Testing/) support project for game/Unity stubs and neutral logging. It does not depend on CraftFromStorage or replace the in-game checks.
+
+Each interaction scenario has its own named method, fresh fixture and short XML summary. The shared runner prints scenario names, identifies failing tests and reports test/assertion totals.
 
 Release notes are maintained in [CHANGELOG.md](CHANGELOG.md).

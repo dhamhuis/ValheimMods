@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 
 namespace AutoRepair;
 
@@ -6,21 +6,25 @@ namespace AutoRepair;
 internal static class CraftingStationRepairPatch
 {
     [HarmonyPostfix]
-    private static void AfterInteract(Humanoid user)
+    private static void AfterInteract(CraftingStation __instance, Humanoid user, bool repeat)
     {
         Player localPlayer = Player.m_localPlayer;
-        if (localPlayer == null || user != localPlayer)
+
+        if (repeat || localPlayer == null || user != localPlayer
+            || localPlayer.GetCurrentCraftingStation() != __instance)
         {
             return;
         }
 
         var inventoryGui = InventoryGui.instance;
+
         if (inventoryGui == null)
         {
             return;
         }
 
         var inventory = localPlayer.GetInventory();
+
         if (inventory == null)
         {
             return;
@@ -28,6 +32,7 @@ internal static class CraftingStationRepairPatch
 
         int maximumRepairs = inventory.GetAllItems().Count;
         int repairAttempts = 0;
+
         while (repairAttempts < maximumRepairs && inventoryGui.HaveRepairableItems())
         {
             inventoryGui.RepairOneItem();

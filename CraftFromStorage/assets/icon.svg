@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>CraftFromStorage mod icon</title>
+  <desc>Original storage chest feeding a crafting hammer inside the shared carved-wood frame.</desc>
+  <defs>
+    <radialGradient id="panel">
+      <stop offset="0" stop-color="#33443e"/>
+      <stop offset="1" stop-color="#121a18"/>
+    </radialGradient>
+    <linearGradient id="chest" x2="0" y2="1">
+      <stop stop-color="#a37646"/>
+      <stop offset="1" stop-color="#483021"/>
+    </linearGradient>
+    <linearGradient id="gold">
+      <stop stop-color="#f3d396"/>
+      <stop offset="1" stop-color="#b17639"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="#101714"/>
+  <rect x="91" y="91" width="330" height="330" rx="41" fill="url(#panel)"/>
+  <g stroke="#17110d" stroke-width="9" stroke-linejoin="round">
+    <path d="M133 249 L273 249 L283 282 L283 352 L133 352 Z" fill="url(#chest)"/>
+    <path d="M133 249 Q203 214 273 249 L283 282 L133 282 Z" fill="url(#chest)"/>
+    <path d="M158 248 L158 352 M254 245 L254 352 M133 282 L283 282" fill="none" stroke="#9b9b81" stroke-width="12"/>
+    <rect x="195" y="276" width="28" height="33" rx="3" fill="url(#gold)"/>
+    <path d="M290 292 L307 306 L363 217 L346 205 Z" fill="#93633e"/>
+    <path d="M327 201 L343 178 L390 209 L374 233 Z" fill="url(#gold)"/>
+  </g>
+  <path d="M193 193 Q250 127 310 178 L288 174 M310 178 L306 155"
+    fill="none" stroke="#f3d396" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <image href="../../assets/icons/valheim-wood-frame.svg" width="512" height="512"/>
+</svg>
