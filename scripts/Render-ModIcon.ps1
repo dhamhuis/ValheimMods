@@ -10,13 +10,30 @@ if (-not (Test-Path -LiteralPath $EdgePath)) { throw 'Microsoft Edge is required
 $modRoot = (Resolve-Path -LiteralPath $ModDirectory).Path
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 [xml]$icon = Get-Content -LiteralPath (Join-Path $modRoot 'assets\icon.svg') -Raw
-[xml]$frame = Get-Content -LiteralPath (Join-Path $repositoryRoot 'assets\icons\valheim-wood-frame.svg') -Raw
-$images = @($icon.DocumentElement.ChildNodes | Where-Object {
-    $_.LocalName -eq 'image' -and $_.GetAttribute('href') -eq '../../assets/icons/valheim-wood-frame.svg'
+$layers = @($icon.DocumentElement.ChildNodes | Where-Object {
+    $_.NodeType -eq [System.Xml.XmlNodeType]::Element -and $_.LocalName -notin @('title', 'desc', 'defs')
 })
-if ($images.Count -ne 1) { throw 'Expected one image referencing the shared valheim-wood-frame.svg in assets\icon.svg.' }
-$image = $images[0]
-$icon.DocumentElement.ReplaceChild($icon.ImportNode($frame.DocumentElement, $true), $image) | Out-Null
+if ($layers.Count -lt 2 -or $layers[0].LocalName -ne 'image' -or
+    $layers[0].GetAttribute('href') -ne '../../assets/icons/valheim-panel.svg' -or
+    $layers[-1].LocalName -ne 'image' -or
+    $layers[-1].GetAttribute('href') -ne '../../assets/icons/valheim-wood-frame.svg') {
+    throw 'The shared panel must be the first visual layer and the shared frame must be the last in assets\icon.svg.'
+}
+foreach ($name in @('valheim-panel.svg', 'valheim-wood-frame.svg')) {
+    $href = "../../assets/icons/$name"
+    $images = @($icon.DocumentElement.ChildNodes | Where-Object {
+        $_.LocalName -eq 'image' -and $_.GetAttribute('href') -eq $href
+    })
+    if ($images.Count -ne 1) { throw "Expected exactly one image referencing $href in assets\icon.svg." }
+    [xml]$shared = Get-Content -LiteralPath (Join-Path $repositoryRoot "assets\icons\$name") -Raw
+    $icon.DocumentElement.ReplaceChild($icon.ImportNode($shared.DocumentElement, $true), $images[0]) | Out-Null
+}
+$ids = @{}
+foreach ($node in $icon.SelectNodes('//*[@id]')) {
+    $id = $node.GetAttribute('id')
+    if ($ids.ContainsKey($id)) { throw "Duplicate SVG ID '$id' in the icon and shared layers." }
+    $ids[$id] = $true
+}
 $icon.DocumentElement.SetAttribute('width', '256')
 $icon.DocumentElement.SetAttribute('height', '256')
 $temporary = Join-Path ([System.IO.Path]::GetTempPath()) ("ValheimMod-icon-" + [guid]::NewGuid())

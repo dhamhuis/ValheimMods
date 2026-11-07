@@ -2,10 +2,6 @@
   <title>CraftFromStorage mod icon</title>
   <desc>Original storage chest feeding a crafting hammer inside the shared carved-wood frame.</desc>
   <defs>
-    <radialGradient id="panel">
-      <stop offset="0" stop-color="#33443e"/>
-      <stop offset="1" stop-color="#121a18"/>
-    </radialGradient>
     <linearGradient id="chest" x2="0" y2="1">
       <stop stop-color="#a37646"/>
       <stop offset="1" stop-color="#483021"/>
@@ -15,8 +11,7 @@
       <stop offset="1" stop-color="#b17639"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" fill="#101714"/>
-  <rect x="91" y="91" width="330" height="330" rx="41" fill="url(#panel)"/>
+  <image href="../../assets/icons/valheim-panel.svg" width="512" height="512"/>
   <g stroke="#17110d" stroke-width="9" stroke-linejoin="round">
     <path d="M133 249 L273 249 L283 282 L283 352 L133 352 Z" fill="url(#chest)"/>
     <path d="M133 249 Q203 214 273 249 L283 282 L133 282 Z" fill="url(#chest)"/>

@@ -145,8 +145,8 @@ Reusable development tools also live in the root `scripts/` folder and take `-Mo
 .\scripts\Validate-ModPatches.ps1 -ModDirectory .\AutoRepair
 ```
 
-`Render-ModIcon.ps1` reads `<Mod>/assets/icon.svg`, inlines its shared frame reference, and writes `<Mod>/Thunderstore/icon.png`. Microsoft Edge is required; override its executable with `-EdgePath`.
+`Render-ModIcon.ps1` reads `<Mod>/assets/icon.svg`, inlines its shared panel and frame references, and writes `<Mod>/Thunderstore/icon.png`. Microsoft Edge is required; override its executable with `-EdgePath`.
 
 `Validate-ModPatches.ps1` reads `AssemblyName` from the mod's single `src/*.csproj` and inspects `dist/<AssemblyName>.dll`; build the mod first. It accepts `-ValheimInstallDir`, `-R2ModmanProfileDir`, and `-BepInExCoreDir`. It checks class-level Harmony patches declared with a target type, method name and optional parameter type array, and named or positional target arguments. Unsupported declaration forms fail explicitly; this is a signature check, not a complete Harmony/runtime verifier.
 
-The shared frame source lives in `assets/icons/valheim-wood-frame.svg`. Each mod owns its composition in `<Mod>/assets/icon.svg`, and the generated package PNG in `<Mod>/Thunderstore/icon.png`. Changing an SVG requires regenerating the PNG; packaging uses the PNG and does not render the SVG automatically.
+All mod icons use the shared background in `assets/icons/valheim-panel.svg` and the overlay in `assets/icons/valheim-wood-frame.svg`. In each `<Mod>/assets/icon.svg`, reference the panel as the first visual layer and the frame as the last, with mod-specific graphics between them. The renderer requires exactly one reference to each and rejects duplicate SVG IDs across the combined artwork. Each mod owns its generated PNG in `<Mod>/Thunderstore/icon.png`. Changing an SVG requires regenerating affected PNGs; packaging uses the PNG and does not render the SVG automatically.

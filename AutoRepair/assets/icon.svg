@@ -2,10 +2,6 @@
   <title>AutoRepair mod icon</title>
   <desc>Original AutoRepair icon: a connected repair hammer striking a physically torn shield inside the shared carved-wood frame.</desc>
   <defs>
-    <radialGradient id="panel" cx="50%" cy="42%" r="72%">
-      <stop offset="0" stop-color="#33443e"/>
-      <stop offset="1" stop-color="#121a18"/>
-    </radialGradient>
     <linearGradient id="shield" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#58665b"/>
       <stop offset="0.5" stop-color="#34443e"/>
@@ -28,23 +24,23 @@
       <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <rect width="512" height="512" fill="#101714"/>
-  <rect x="91" y="91" width="330" height="330" rx="41" fill="url(#panel)" stroke="#0b100f" stroke-width="8"/>
-  <circle cx="256" cy="256" r="135" fill="none" stroke="#738276" stroke-opacity="0.12" stroke-width="2"/>
-  <path d="M256 145 L327 173 L319 255 C314 298 288 330 256 350 C224 330 198 298 193 255 L185 173 Z" fill="#0e1514" stroke="#100e0b" stroke-width="15" stroke-linejoin="round" filter="url(#symbolShadow)"/>
-  <path d="M251 153 L201 177 L208 251 C213 289 228 306 244 315 L256 300 L246 280 L264 261 L244 243 L262 224 L240 205 L249 185 Z" fill="url(#shield)" stroke="url(#gold)" stroke-width="7" stroke-linejoin="round"/>
-  <path d="M261 153 L319 177 L312 251 C307 289 290 306 268 315 L256 300 L266 280 L248 261 L268 243 L250 224 L272 205 L263 185 Z" fill="url(#shield)" stroke="url(#gold)" stroke-width="7" stroke-linejoin="round"/>
-  <path d="M254 173 L256 185 L246 205 L264 224 L246 243 L264 261 L248 280 L258 300" fill="none" stroke="#111816" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-  <g filter="url(#symbolShadow)" stroke="#17110d" stroke-width="8" stroke-linejoin="round">
-    <path d="M178 319 L196 337 L327 206 L309 188 Z" fill="url(#handle)"/>
-    <path d="M301 181 L319 163 L342 186 L324 204 Z" fill="url(#handle)"/>
-    <path d="M278 157 L301 134 L365 198 L342 221 Z" fill="url(#gold)"/>
-    <path d="M293 161 L301 153 L349 201 L341 209 Z" fill="none" stroke="#ffe0a2" stroke-opacity="0.75" stroke-width="5"/>
-  </g>
-  <g fill="none" stroke="#f1c77d" stroke-width="7" stroke-linecap="round" transform="translate(8 -7)">
-    <path d="M348 215 L371 215"/>
-    <path d="M347 224 L364 241"/>
-    <path d="M339 230 L339 250"/>
+  <image href="../../assets/icons/valheim-panel.svg" width="512" height="512"/>
+  <g transform="translate(256 247.5) scale(1.12) translate(-256 -247.5)">
+    <path d="M256 145 L327 173 L319 255 C314 298 288 330 256 350 C224 330 198 298 193 255 L185 173 Z" fill="#0e1514" stroke="#100e0b" stroke-width="15" stroke-linejoin="round" filter="url(#symbolShadow)"/>
+    <path d="M251 153 L201 177 L208 251 C213 289 228 306 244 315 L256 300 L246 280 L264 261 L244 243 L262 224 L240 205 L249 185 Z" fill="url(#shield)" stroke="url(#gold)" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M261 153 L319 177 L312 251 C307 289 290 306 268 315 L256 300 L266 280 L248 261 L268 243 L250 224 L272 205 L263 185 Z" fill="url(#shield)" stroke="url(#gold)" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M254 173 L256 185 L246 205 L264 224 L246 243 L264 261 L248 280 L258 300" fill="none" stroke="#111816" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <g filter="url(#symbolShadow)" stroke="#17110d" stroke-width="8" stroke-linejoin="round">
+      <path d="M178 319 L196 337 L327 206 L309 188 Z" fill="url(#handle)"/>
+      <path d="M301 181 L319 163 L342 186 L324 204 Z" fill="url(#handle)"/>
+      <path d="M278 157 L301 134 L365 198 L342 221 Z" fill="url(#gold)"/>
+      <path d="M293 161 L301 153 L349 201 L341 209 Z" fill="none" stroke="#ffe0a2" stroke-opacity="0.75" stroke-width="5"/>
+    </g>
+    <g fill="none" stroke="#f1c77d" stroke-width="7" stroke-linecap="round" transform="translate(8 -7)">
+      <path d="M348 215 L371 215"/>
+      <path d="M347 224 L364 241"/>
+      <path d="M339 230 L339 250"/>
+    </g>
   </g>
   <image href="../../assets/icons/valheim-wood-frame.svg" x="0" y="0" width="512" height="512"/>
 </svg>

@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <title>SupplyFromStorage mod icon</title>
-  <desc>A carved chest supplies glowing fuel and ore to a furnace inside the shared wood frame.</desc>
+  <desc>A storage chest supplies fuel to a furnace inside the shared carved-wood frame.</desc>
   <defs>
-    <radialGradient id="panel" cx="50%" cy="42%" r="72%">
-      <stop offset="0" stop-color="#33443e"/>
-      <stop offset="1" stop-color="#121a18"/>
-    </radialGradient>
-    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#c99455"/>
-      <stop offset="1" stop-color="#65412b"/>
+    <linearGradient id="chest" x2="0" y2="1">
+      <stop stop-color="#a37646"/>
+      <stop offset="1" stop-color="#483021"/>
+    </linearGradient>
+    <linearGradient id="gold">
+      <stop stop-color="#f3d396"/>
+      <stop offset="1" stop-color="#b17639"/>
     </linearGradient>
     <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#d9d3bb"/>
@@ -18,31 +18,25 @@
       <stop offset="0" stop-color="#ca692f"/>
       <stop offset="1" stop-color="#f4d28c"/>
     </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+    <filter id="symbolShadow" x="-20%" y="-20%" width="140%" height="140%">
       <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
       <feOffset dx="0" dy="5"/>
       <feComponentTransfer><feFuncA type="linear" slope="0.65"/></feComponentTransfer>
       <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <rect width="512" height="512" fill="#101714"/>
-  <rect x="91" y="91" width="330" height="330" rx="41" fill="url(#panel)" stroke="#0b100f" stroke-width="8"/>
-  <circle cx="256" cy="256" r="132" fill="none" stroke="#738276" stroke-opacity="0.14" stroke-width="3"/>
-  <g filter="url(#shadow)" stroke="#241910" stroke-width="10" stroke-linejoin="round">
-    <path d="M118 228 L220 193 L220 337 L118 372 Z" fill="url(#wood)"/>
-    <path d="M220 193 L291 218 L291 363 L220 337 Z" fill="#7b5030"/>
-    <path d="M118 228 L187 194 L291 218 L220 251 Z" fill="#d2a263"/>
-    <path d="M143 255 L195 237 L195 324 L143 342 Z" fill="#2b2118" stroke="#e0b777" stroke-width="7"/>
-    <path d="M194 277 L220 270 L220 312 L194 321 Z" fill="#3c2a1c" stroke="#d8ae6f" stroke-width="5"/>
-    <path d="M165 229 L165 345 M242 226 L242 345" fill="none" stroke="#523520" stroke-width="8"/>
+  <image href="../../assets/icons/valheim-panel.svg" width="512" height="512"/>
+  <g stroke="#17110d" stroke-width="9" stroke-linejoin="round" transform="translate(-12 -36)">
+    <path d="M133 249 L273 249 L283 282 L283 352 L133 352 Z" fill="url(#chest)"/>
+    <path d="M133 249 Q203 214 273 249 L283 282 L133 282 Z" fill="url(#chest)"/>
+    <path d="M158 248 L158 352 M254 245 L254 352 M133 282 L283 282" fill="none" stroke="#9b9b81" stroke-width="12"/>
+    <rect x="195" y="276" width="28" height="33" rx="3" fill="url(#gold)"/>
   </g>
-  <g fill="none" stroke="#e7c47d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M300 248 C326 228 345 228 365 241"/>
-    <path d="M355 227 L370 242 L352 254"/>
-    <path d="M300 322 C326 342 345 342 365 329"/>
-    <path d="M355 343 L370 328 L352 316"/>
+  <g fill="none" stroke="#f3d396" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M193 193 Q250 127 310 178 L288 174 M310 178 L306 155" transform="translate(15 -3)"/>
+    <path d="M193 193 Q250 127 310 178 L288 174 M310 178 L306 155" transform="translate(0 512) scale(1 -1) translate(15 -3)"/>
   </g>
-  <g filter="url(#shadow)" stroke="#191513" stroke-width="8" stroke-linejoin="round">
+  <g filter="url(#symbolShadow)" stroke="#191513" stroke-width="8" stroke-linejoin="round" transform="translate(-268 -236) scale(1.65)">
     <path d="M361 279 L394 279 L402 333 L353 333 Z" fill="url(#metal)"/>
     <path d="M356 278 L360 262 L395 262 L400 278 Z" fill="#56645f"/>
     <path d="M375 294 C357 313 369 323 380 323 C396 320 391 306 383 292 C382 305 378 306 375 294 Z" fill="url(#flame)" stroke="none"/>

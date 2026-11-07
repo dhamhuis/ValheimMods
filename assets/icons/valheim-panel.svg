@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>Valheim-inspired icon panel</title>
+  <defs>
+    <radialGradient id="sharedPanelGradient" cx="50%" cy="42%" r="72%">
+      <stop offset="0" stop-color="#33443e"/>
+      <stop offset="1" stop-color="#121a18"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="#101714"/>
+  <rect x="91" y="91" width="330" height="330" rx="41" fill="url(#sharedPanelGradient)" stroke="#0b100f" stroke-width="8"/>
+  <circle cx="256" cy="256" r="132" fill="none" stroke="#738276" stroke-opacity="0.14" stroke-width="3"/>
+</svg>
