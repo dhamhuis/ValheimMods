@@ -10,8 +10,10 @@ namespace AutoRepair;
 public sealed class AutoRepairPlugin : BaseUnityPlugin
 {
     public const string PluginName = "AutoRepair";
-    public const string PluginAuthor = "dhamhuis";
-    public const string PluginGuid = PluginAuthor + ".valheim.autorepair";
+    public const string PluginAuthor = "Hoose";
+
+    // Keep the installed plugin identity stable when author branding changes.
+    public const string PluginGuid = "dhamhuis.valheim.autorepair";
     public const string PluginVersion = "1.0.0";
 
     private Harmony _harmony;

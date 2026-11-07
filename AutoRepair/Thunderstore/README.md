@@ -1,6 +1,6 @@
 # AutoRepair
 
-By dhamhuis.
+By Hoose.
 
 ## What it does
 

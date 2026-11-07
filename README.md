@@ -1,6 +1,6 @@
 # ValheimMods
 
-Valheim mods by dhamhuis, developed as focused BepInEx plugins.
+Valheim mods by Hoose, developed as focused BepInEx plugins.
 
 ## Mods
 

@@ -11,8 +11,10 @@ namespace CraftFromStorage;
 public sealed class CraftFromStoragePlugin : BaseUnityPlugin
 {
     public const string PluginName = "CraftFromStorage";
-    public const string PluginAuthor = "dhamhuis";
-    public const string PluginGuid = PluginAuthor + ".valheim.craftfromstorage";
+    public const string PluginAuthor = "Hoose";
+
+    // Keep the installed plugin identity stable when author branding changes.
+    public const string PluginGuid = "dhamhuis.valheim.craftfromstorage";
     public const string PluginVersion = "1.0.0";
 
     private Harmony _harmony;

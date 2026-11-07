@@ -1,5 +1,7 @@
 # CraftFromStorage
 
+By Hoose.
+
 Craft and upgrade at Valheim crafting stations using ingredients in nearby storage, without carrying them in your inventory.
 
 ## Behavior

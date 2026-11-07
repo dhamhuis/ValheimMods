@@ -10,7 +10,7 @@ internal static class PatchIntegrationTests
 {
     internal static void Run(TestRunner runner)
     {
-        var harmony = new Harmony("dhamhuis.valheim.craftfromstorage.tests");
+        var harmony = new Harmony("Hoose.valheim.craftfromstorage.tests");
 
         try
         {

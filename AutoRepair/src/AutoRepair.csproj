@@ -9,10 +9,11 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <Version>1.0.0</Version>
-    <Company>dhamhuis</Company>
+    <Authors>Hoose</Authors>
+    <Company>Hoose</Company>
     <Product>Valheim AutoRepair</Product>
     <Description>Automatically repairs equipment eligible at the current crafting station.</Description>
-    <Copyright>Copyright (c) dhamhuis 2026</Copyright>
+    <Copyright>Copyright (c) Hoose 2026</Copyright>
     <ValheimInstallDir Condition="'$(ValheimInstallDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimInstallDir>
     <ValheimManagedDir Condition="'$(ValheimManagedDir)' == ''">$(ValheimInstallDir)\valheim_Data\Managed</ValheimManagedDir>
     <R2ModmanProfileDir Condition="'$(R2ModmanProfileDir)' == ''">$(APPDATA)\r2modmanPlus-local\Valheim\profiles\Valheim Mod Building</R2ModmanProfileDir>

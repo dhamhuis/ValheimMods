@@ -1,6 +1,6 @@
 # AutoRepair
 
-AutoRepair by dhamhuis repairs eligible equipment in the local player's inventory when they interact with a crafting station. It uses Valheim's normal repair methods rather than changing item durability directly.
+AutoRepair by Hoose repairs eligible equipment in the local player's inventory when they interact with a crafting station. It uses Valheim's normal repair methods rather than changing item durability directly.
 
 The [Thunderstore README](Thunderstore/README.md) is the player-facing page included in the release package. This README describes the mod's behavior and implementation.
 

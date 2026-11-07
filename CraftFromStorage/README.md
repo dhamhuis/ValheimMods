@@ -1,6 +1,6 @@
 # CraftFromStorage
 
-CraftFromStorage by dhamhuis lets the local player craft and upgrade equipment at crafting stations using accessible storage within a **20 metre sphere centered on the player**.
+CraftFromStorage by Hoose lets the local player craft and upgrade equipment at crafting stations using accessible storage within a **20 metre sphere centered on the player**.
 
 The [Thunderstore README](Thunderstore/README.md) is the player-facing package page.
 
