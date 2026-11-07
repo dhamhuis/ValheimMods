@@ -2,6 +2,8 @@
 
 ## Prerequisites
 
+For library selection, existing API knowledge, and discovery procedures, start with the [mod API reference](reference/README.md). It distinguishes installed assembly signatures from repository behavior and live-game verification.
+
 - .NET SDK supporting the project's C# language version.
 - A local Steam installation of Valheim.
 - A r2modman Valheim profile with BepInExPack_Valheim installed.
@@ -107,6 +109,17 @@ The tests apply real Harmony patches to game stubs, not a live Unity instance. T
 The shared icon renderer uses an isolated headless Microsoft Edge profile to rasterize the original SVG with the shared frame, then writes a 256x256 PNG. It does not launch Valheim.
 
 ## Shared tools and artwork
+
+Reference maintenance tools do not build, deploy, or modify game assemblies:
+
+```powershell
+.\scripts\Get-ValheimApi.ps1 -AssemblyPath 'C:\path\to\assembly_valheim.dll'
+.\scripts\Get-ValheimApi.ps1 -AssemblyPath 'C:\path\to\assembly_valheim.dll' -TypeName Inventory -MemberName CountItems,RemoveItem
+.\scripts\tests\Test-AgentReference.ps1
+.\scripts\tests\Test-GetValheimApi.ps1
+```
+
+The inspector uses the selected profile's Mono.Cecil to read metadata without executing game code. With no type it reports only assembly identity, MVID, and SHA-256; targeted inspection requires both a type and member names. Property output includes individual getter/setter visibility. Override `-BepInExCoreDir` for another profile; the inspector regression tests accept the same option and use a temporary synthetic DLL, not game assemblies. The reference validator checks structure, real verification dates (or `Never` for unknown topics), file links, and instruction/skill wiring, not API behavior or whether an agent followed instructions. See the [discovery skill](../.github/skills/valheim-api-discovery/SKILL.md) for a fresh-session acceptance check.
 
 Per-mod wrappers call the root `scripts/Build-Mod.ps1` and `scripts/Package-Thunderstore.ps1`, passing the mod directory. New mods can use the same `src/`, `scripts/`, `Thunderstore/`, and `dist/` layout.
 

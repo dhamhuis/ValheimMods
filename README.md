@@ -26,6 +26,8 @@ See the [build, deployment, and packaging guide](docs/Development.md) for prereq
 
 Repository-wide [C# coding standards and AI instructions](AGENTS.md) apply to source and tests.
 
+The [mod API reference](docs/reference/README.md) maps supporting libraries and verified API usage. Agents consult its index before discovery and maintain relevant findings during normal work; see the [API discovery skill](.github/skills/valheim-api-discovery/SKILL.md) for investigating gaps.
+
 ## Artwork
 
 The [carved-wood frame](assets/icons/valheim-wood-frame.svg) is shared across mod icons. Each mod owns its composition, such as [AutoRepair's icon source](AutoRepair/assets/icon.svg), and its 256x256 package PNG.

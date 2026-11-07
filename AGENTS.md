@@ -2,6 +2,15 @@
 
 Apply these rules to all maintained C# source and tests. Preserve behavior when making style-only changes.
 
+## Agent knowledge workflow
+
+- At the start of each repository task, read the [mod API reference index](docs/reference/README.md). For mod implementation, debugging, review, or API questions, read the relevant topic pages before searching libraries or inspecting assemblies. Documentation-only tasks need only the index and affected pages.
+- Reuse documented APIs and repository examples first. Load only relevant topics; do not dump entire assemblies or load the whole reference into every session.
+- Follow the [API discovery skill](.github/skills/valheim-api-discovery/SKILL.md) when coverage is missing, uncertain, contradicted, or stale. Missing documentation is not evidence that functionality does not exist.
+- As part of the same task, update the reference with reusable verified discoveries, corrected assumptions, compatibility changes, and important bounded negative findings. Add new topics to the index. Do not wait for the user to request maintenance.
+- Record evidence level, verification date, assembly fingerprint when applicable, and remaining unknowns. Never present repository usage, stub tests, or signature inspection as proof of live game behavior. Revalidate only affected knowledge when assemblies change; do not silently relabel old findings as current.
+- Before completion, run the [reference validator](scripts/tests/Test-AgentReference.ps1) after reference, discovery skill, or workflow changes, and report relevant knowledge updates and unresolved verification limits. For runtime changes also follow the normal build, test, and in-game validation requirements.
+
 ## All project files
 
 - Every maintained repository text file must end immediately after its last content character: no final newline, trailing blank line, or trailing whitespace at EOF. This applies to source, scripts, documentation, configuration, and project/solution metadata, not just C# or `.csproj` files.
