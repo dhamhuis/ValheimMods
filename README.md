@@ -7,7 +7,7 @@ Valheim mods by Hoose, developed as focused BepInEx plugins.
 | Mod | Purpose |
 | --- | --- |
 | [AutoRepair](AutoRepair/README.md) | Repairs eligible inventory equipment when you interact with a crafting station. |
-| [CraftFromStorage](CraftFromStorage/README.md) | Crafts and upgrades at stations using accessible storage within 20 metres of the player. |
+| [CraftFromStorage](CraftFromStorage/README.md) | Crafts and upgrades at stations using accessible storage within 20 meters of the player. |
 | [SupplyFromStorage](SupplyFromStorage/README.md) | Supplies one accepted fuel or processing input from nearby accessible storage per machine E interaction. |
 
 SupplyFromStorage is a separate plugin from CraftFromStorage. It does not automate cooking ingredients or fermenter bases.

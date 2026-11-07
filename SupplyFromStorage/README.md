@@ -9,11 +9,11 @@ SupplyFromStorage by Hoose adds one accepted fuel or processing input from nearb
 - **Smelter fuel:** smelters and blast furnaces using Valheim's `Smelter` fuel slot.
 - **Processing inputs:** charcoal kiln, smelters, blast furnaces, windmill, spinning wheel and eitr refinery when their prefab uses the vanilla `Smelter` conversion list. Each prefab's current accepted conversion entries determine which items can be supplied.
 
-The mod does not load cooking ingredients, fermenter bases, outputs or unrelated crafting ingredients. It does not read or consume items from the player's inventory. Fueling and processing-input automation have independent configuration switches, both enabled by default.
+The normal E interaction uses an accepted item from the player's inventory first, and vanilla consumes that item. If the player has no accepted item in inventory, SupplyFromStorage falls back to an eligible item in nearby accessible storage; that fallback consumes the item from the container, not the player's inventory. It does not load cooking ingredients, fermenter bases, outputs or unrelated crafting ingredients. Fuel-from-storage and processing-input-from-storage have separate BepInEx configuration switches, both enabled by default.
 
 ## Access and multiplayer behavior
 
-Storage and machines must be within an inclusive **20 metre sphere centered on the local player**. Storage access, ward checks, busy state and cart use follow CraftFromStorage's container rules. Transfers recheck range, access, ownership, station capacity and item quantity immediately before removing a storage item. A station's vanilla acceptance/conversion data is checked before insertion. Each valid E action transfers at most one item; holding E repeats according to the game's interaction repeat interval. No items are supplied during station updates or when the world loads. Failed, full, unavailable, out-of-range and no-eligible-item attempts are briefly rate-limited; successful transfers are not throttled.
+Storage and machines must be within an inclusive **20 meter sphere centered on the local player**. Storage access, ward checks, busy state and cart use follow CraftFromStorage's container rules. Transfers recheck range, access, ownership, station capacity and item quantity immediately before removing a storage item. A station's vanilla acceptance/conversion data is checked before insertion. Each valid E action transfers at most one item; holding E repeats according to the game's interaction repeat interval. No items are supplied during station updates or when the world loads. Failed, full, unavailable, out-of-range and no-eligible-item attempts are briefly rate-limited; successful transfers are not throttled.
 
 For Smelter inputs, the game normally reports “You don't have any processable items” before a postfix can supply from storage. SupplyFromStorage checks storage before vanilla takes that branch, suppresses the message when it successfully adds an item, and preserves vanilla inventory handling and the full-station message.
 
@@ -27,10 +27,10 @@ Requires BepInExPack_Valheim. Install on the client; a server-only install does 
 
 For manual installation, copy `plugins/SupplyFromStorage.dll` into `BepInEx/plugins/SupplyFromStorage/`. Keep only one installed copy.
 
-Configuration is in `BepInEx/config/dhamhuis.valheim.supplyfromstorage.cfg`:
+Configuration is in `BepInEx/config/hoose.valheim.supplyfromstorage.cfg`:
 
-- `Automation/Automatic fuel` (default `true`): enable one fuel item per valid machine E action.
-- `Automation/Automatic processing inputs` (default `true`): enable one processing input per valid machine E action.
+- `Automation/Automatic fuel` (default `true`): enable one fuel item from storage per valid machine E action.
+- `Automation/Automatic processing inputs` (default `true`): enable one processing input from storage per valid machine E action.
 
 This is a local preview, not a published or in-game-certified release. Stub tests and a successful build do not prove live-game networking or persistence.
 

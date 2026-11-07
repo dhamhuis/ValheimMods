@@ -31,7 +31,7 @@ Private members are accessed through the publicized reference. `Load()` returns 
 
 [NearbyStorage](../../CraftFromStorage/src/NearbyStorage.cs) seeds a registry from loaded containers; [creation](../../CraftFromStorage/src/ContainerCreatedPatch.cs) and [destruction](../../CraftFromStorage/src/ContainerDestroyedPatch.cs) patches maintain it. `Find` filters, calls `Load`, and sorts by squared distance with instance ID as a tie-breaker. It caches results for the same frame/player/position unless refreshed.
 
-`IsAccessible` requires an active container, valid network view, inventory, and a player within a **20-metre player-centred radius**. It checks local/network in-use state, wagon use, player access, and ward access when requested by the container. `allowReserved` bypasses one local busy test for our own reservation, not all access checks. Radius, filtering, and ordering are this mod's policies, not universal Valheim rules.
+`IsAccessible` requires an active container, valid network view, inventory, and a player within a **20-meter player-centered radius**. It checks local/network in-use state, wagon use, player access, and ward access when requested by the container. `allowReserved` bypasses one local busy test for our own reservation, not all access checks. Radius, filtering, and ordering are this mod's policies, not universal Valheim rules.
 
 ### Ownership and mutation policy
 

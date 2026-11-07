@@ -13,7 +13,7 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
 {
     public const string PluginName = "SupplyFromStorage";
     public const string PluginAuthor = "Hoose";
-    public const string PluginGuid = "dhamhuis.valheim.supplyfromstorage";
+    public const string PluginGuid = "hoose.valheim.supplyfromstorage";
     public const string PluginVersion = "1.0.0";
 
     private Harmony _harmony;

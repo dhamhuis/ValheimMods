@@ -6,6 +6,6 @@
 - Repeat one-item transfers while E is held, following vanilla interaction timing; do not fill stations during world load or periodic updates.
 - Suppress the Smelter no-processable-items message when an accepted storage input is supplied; preserve vanilla inventory and full-station feedback.
 - Supply accepted items from locally owned, accessible storage in a 20m player-centered sphere.
-- Use vanilla fire/cooking/smelter fuel slots and current Smelter conversion entries without reading player inventory.
+- Use vanilla fire/cooking/smelter fuel slots and current Smelter conversion entries; vanilla uses accepted player-inventory items first, then the mod falls back to accessible storage.
 - Preserve vanilla player-inventory interactions and fire toggles; recheck container permission, ownership, station state and capacity before removing each item, and rate-limit unsuccessful checks.
 - Add focused behavior and Harmony integration tests, including the CraftFromStorage inventory-hook boundary.

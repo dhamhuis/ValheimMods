@@ -6,7 +6,7 @@ Craft and upgrade at Valheim crafting stations using ingredients in nearby stora
 
 ## Behavior
 
-- Fixed **20 metre sphere around the player**, not around the station.
+- Fixed **20 meter sphere around the player**, not around the station.
 - Uses your inventory first, then nearby accessible chests, carts and ship storage, nearest first.
 - Includes cauldron recipes and equipment upgrades; ingredients may be split across several containers.
 - Respects chest ownership, wards and normal recipe/station rules. Busy storage is skipped.
