@@ -12,6 +12,8 @@ public class ZNetView
 
     public bool IsValid() => Valid;
 
+    public bool IsOwner() => Owner;
+
     public ZDO GetZDO() => Zdo;
 
     public void InvokeRPC(string method, params object[] args) => OnRequest?.Invoke(method, args);

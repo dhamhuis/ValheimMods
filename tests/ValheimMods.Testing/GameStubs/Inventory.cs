@@ -11,6 +11,23 @@ public class Inventory
 
     public bool ContainsItem(ItemDrop.ItemData item) => Items.Contains(item);
 
+    public bool AddItem(ItemDrop.ItemData item)
+    {
+        if (item == null)
+        {
+            return false;
+        }
+
+        if (!Items.Contains(item))
+        {
+            Items.Add(item);
+        }
+
+        Changes++;
+
+        return true;
+    }
+
     public bool RemoveItem(ItemDrop.ItemData item, int amount)
     {
         if (!Items.Contains(item) || item.m_stack < amount)

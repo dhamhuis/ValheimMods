@@ -2,6 +2,6 @@ public static class MessageHud
 {
     public enum MessageType
     {
-        Center
+        Center = 2
     }
 }
