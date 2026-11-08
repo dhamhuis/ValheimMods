@@ -2,7 +2,7 @@
 
 Status: Verified - installed signatures and repository implementation only.
 Last verified: 2026-11-06.
-Evidence: Targeted Mono.Cecil inspection at the [library baseline](Libraries.md); [NearbyStorage](../../CraftFromStorage/src/NearbyStorage.cs), [StorageCrafting](../../CraftFromStorage/src/StorageCrafting.cs), and lifecycle/response patches linked below.
+Evidence: Targeted Mono.Cecil inspection at the [library baseline](Libraries.md); [NearbyStorage](../../ValheimMods.Common/src/Crafting/NearbyStorage.cs), [StorageCrafting](../../ValheimMods.Common/src/Crafting/StorageCrafting.cs), and lifecycle/response patches linked below.
 Limitations: Access and protocol descriptions below are mod policy inferred directly from source, not an independent verification of game RPC internals, authorization, network ordering, or disk persistence.
 
 ## Use when
@@ -29,15 +29,15 @@ Private members are accessed through the publicized reference. `Load()` returns 
 
 ### Discovery and access policy
 
-[NearbyStorage](../../CraftFromStorage/src/NearbyStorage.cs) seeds a registry from loaded containers; [creation](../../CraftFromStorage/src/ContainerCreatedPatch.cs) and [destruction](../../CraftFromStorage/src/ContainerDestroyedPatch.cs) patches maintain it. `Find` filters, calls `Load`, and sorts by squared distance with instance ID as a tie-breaker. It caches results for the same frame/player/position unless refreshed.
+[NearbyStorage](../../ValheimMods.Common/src/Crafting/NearbyStorage.cs) seeds a registry from loaded containers; [creation](../../ValheimMods.Common/src/Crafting/ContainerCreatedPatch.cs) and [destruction](../../ValheimMods.Common/src/Crafting/ContainerDestroyedPatch.cs) patches maintain it. `Find` filters, calls `Load`, and sorts by squared distance with instance ID as a tie-breaker. It caches results for the same frame/player/position unless refreshed.
 
-`IsAccessible` requires an active container, valid network view, inventory, and a player within a **20-meter player-centered radius**. It checks local/network in-use state, wagon use, player access, and ward access when requested by the container. `allowReserved` bypasses one local busy test for our own reservation, not all access checks. Radius, filtering, and ordering are this mod's policies, not universal Valheim rules.
+`IsAccessible` requires an active container, valid network view, inventory, and a player within the **configured player-centered storage radius**. Each storage mod binds its own `Storage/Storage radius` setting (default 20 m, clamped to 1–100 m by `AcceptableValueRange` and [`StorageRange.Clamp`](../../ValheimMods.Common/src/StorageRange.cs)); shared recipe discovery uses CookFromStorage's radius for food stations and CraftFromStorage's for other stations. Station reach checks in Cook and Supply stay fixed at `StorageRange.StationReach` (20 m) so a small storage radius does not reject a station the player is using. It checks local/network in-use state, wagon use, player access, and ward access when requested by the container. `allowReserved` bypasses one local busy test for our own reservation, not all access checks. Radius, filtering, and ordering are this mod's policies, not universal Valheim rules.
 
 ### Ownership and mutation policy
 
-[StorageCrafting](../../CraftFromStorage/src/StorageCrafting.cs) plans the needed sources, then for each non-owned source sends `InvokeRPC("RPC_RequestOpen", player.GetPlayerID())`. It waits for both a granted response and local `IsOwner()`, with a five-second real-time deadline and ongoing validity checks.
+[StorageCrafting](../../ValheimMods.Common/src/Crafting/StorageCrafting.cs) plans the needed sources, then for each non-owned source sends `InvokeRPC("RPC_RequestOpen", player.GetPlayerID())`. It waits for both a granted response and local `IsOwner()`, with a five-second real-time deadline and ongoing validity checks.
 
-[StorageOwnershipResponsePatch](../../CraftFromStorage/src/StorageOwnershipResponsePatch.cs) routes matching responses into that pending state rather than treating them as ordinary manual chest opens. Late-response guards and [manual-interaction handling](../../CraftFromStorage/src/PendingContainerInteractionPatch.cs) distinguish pending craft responses from a valid later player open.
+[StorageOwnershipResponsePatch](../../ValheimMods.Common/src/Crafting/StorageOwnershipResponsePatch.cs) routes matching responses into that pending state rather than treating them as ordinary manual chest opens. Late-response guards and [manual-interaction handling](../../ValheimMods.Common/src/Crafting/PendingContainerInteractionPatch.cs) distinguish pending craft responses from a valid later player open.
 
 After ownership, the coroutine rechecks accessibility, calls `Load`, sets the owner's local `m_inUse` flag, and records the reservation. It validates UI/player/recipe/station state and source ownership again, then replans ingredients before executing the [crafting flow](Crafting.md). Finally it clears execution/pending state and releases local reservations. This is not a globally atomic network lock.
 

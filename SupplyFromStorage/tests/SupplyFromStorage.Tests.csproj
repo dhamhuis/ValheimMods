@@ -6,6 +6,8 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\ValheimMods.Common\src\ContainerRegistry.cs" Link="Production\ContainerRegistry.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\StorageRange.cs" Link="Production\StorageRange.cs" />
     <Compile Include="..\src\NearbyStorage.cs" Link="Production\NearbyStorage.cs" />
     <Compile Include="..\src\SupplyTransfer.cs" Link="Production\SupplyTransfer.cs" />
     <Compile Include="..\src\*Patch.cs" Link="Production\%(Filename)%(Extension)" />

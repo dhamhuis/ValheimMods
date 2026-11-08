@@ -18,10 +18,11 @@ From the repository root:
 dotnet build .\ValheimMods.sln --configuration Release
 .\AutoRepair\scripts\build.ps1
 .\CraftFromStorage\scripts\build.ps1
+.\CookFromStorage\scripts\build.ps1
 .\SupplyFromStorage\scripts\build.ps1
 ```
 
-The solution build writes normal project output under each mod's `src/bin/`. Each wrapper also copies only its plugin DLL into that mod's `dist/` directory.
+The solution build writes normal project output under each mod's `src/bin/` and builds `ValheimMods.Common`, the shared runtime helper library. Wrappers copy the plugin DLL and, when referenced, `ValheimMods.Common.dll` into that mod's `dist/` directory.
 
 The default paths are the standard Steam installation and the r2modman `Valheim Mod Building` profile. Override them when needed:
 
@@ -35,12 +36,13 @@ The default paths are the standard Steam installation and the r2modman `Valheim 
 
 ```powershell
 .\AutoRepair\scripts\build.ps1 -Deploy -R2ModmanProfileDir 'C:\path\to\profile'
+.\CookFromStorage\scripts\build.ps1 -Deploy -R2ModmanProfileDir 'C:\path\to\profile'
 .\SupplyFromStorage\scripts\build.ps1 -Deploy -R2ModmanProfileDir 'C:\path\to\profile'
 ```
 
-Deployment copies only the plugin DLL to the profile's `BepInEx/plugins/<ModName>` folder. Remove or relocate any older copy first so only one copy of each plugin is installed. Never copy game assemblies, publicized references, Unity, Harmony, or BepInEx DLLs into the plugin folder.
+Deployment copies the plugin DLL and any required shared runtime library to the profile's `BepInEx/plugins/<ModName>` folder. Keep `ValheimMods.Common.dll` beside plugins that reference it. Remove or relocate any older copy first so only one copy of each plugin is installed. Never copy game assemblies, publicized references, Unity, Harmony, or BepInEx DLLs into the plugin folder.
 
-For manual installation, copy the mod's `dist/<ModName>.dll` to the same plugin folder on the test machine, which must have BepInExPack installed.
+For manual installation, copy the mod's plugin DLL and any runtime dependency DLLs from `dist/` to the same plugin folder on the test machine, which must have BepInExPack installed.
 
 Restart Valheim through the selected r2modman profile after replacing the DLL. Check `BepInEx/LogOutput.log` for each plugin's startup message and any errors. The scripts do not launch or terminate the game.
 
@@ -53,6 +55,7 @@ Do not regenerate distribution ZIPs after every code, documentation or artwork e
 ```powershell
 .\AutoRepair\scripts\pack.ps1
 .\CraftFromStorage\scripts\pack.ps1
+.\CookFromStorage\scripts\pack.ps1
 .\SupplyFromStorage\scripts\pack.ps1
 ```
 
@@ -66,13 +69,14 @@ Run filesystem regression tests without building or changing any real distributi
 
 These tests exercise new packages, replacement, locked inputs/destinations, archive validation failure and temporary-file cleanup in an isolated fixture with a stub build step.
 
-The ZIP contains only:
+The ZIP contains only player-facing metadata, the plugin and any required shared runtime libraries:
 
 - `manifest.json`
 - `README.md` from the mod's `Thunderstore/` folder
 - `icon.png` from the mod's `Thunderstore/` folder (256x256)
 - `CHANGELOG.md` from the mod root
 - `plugins/<ModName>.dll`
+- `plugins/ValheimMods.Common.dll` when referenced
 
 The repository overview, mod developer README, and this guide are not packaged. Inspect the ZIP before release. Packaging does not upload to Thunderstore; publishing is a separate action. Keep account credentials out of the repository and use a new version number for each published release.
 
@@ -87,27 +91,42 @@ dotnet run --project .\CraftFromStorage\tests\CraftFromStorage.Tests.csproj --co
 .\scripts\Render-ModIcon.ps1 -ModDirectory .\CraftFromStorage
 ```
 
-Run `.\CraftFromStorage\scripts\pack.ps1` only after review and testing are complete, not on each iteration. Deployment targets `BepInEx/plugins/CraftFromStorage/CraftFromStorage.dll` in the selected profile. The local ZIP is `CraftFromStorage/dist/CraftFromStorage-1.0.0.zip`; it contains the same four root metadata files as the other mods and only `plugins/CraftFromStorage.dll`.
+Run `.\CraftFromStorage\scripts\pack.ps1` only after review and testing are complete, not on each iteration. Deployment targets `BepInEx/plugins/CraftFromStorage/`; the prepared package includes `ValheimMods.Common.dll` beside the plugin.
 
 Each mod has an independent production-linked test executable requiring .NET SDK 10 and a test-only HarmonyX package:
 
 ```powershell
 dotnet run --project .\AutoRepair\tests\AutoRepair.Tests.csproj --configuration Release
 dotnet run --project .\CraftFromStorage\tests\CraftFromStorage.Tests.csproj --configuration Release
+dotnet run --project .\CookFromStorage\tests\CookFromStorage.Tests.csproj --configuration Release
 dotnet run --project .\SupplyFromStorage\tests\SupplyFromStorage.Tests.csproj --configuration Release
 ```
 
-Each test project links only its own mod's production code. Mod-specific plugin doubles live in `TestDoubles/`, Harmony integration checks in `Integration/`, and CraftFromStorage's standalone behavioral checks in `Behavior/`. The mods' tests do not depend on one another.
+Each storage-mod test project links its production code and the shared container helper source, without referencing a built game or common-library assembly. CraftFromStorage and CookFromStorage also link the shared recipe engine; it installs one verified patch set and registers independent food/non-food clients. CookFromStorage's recipe integration suite tests both categories alone, both together, and unloading one client. The signature validator includes the prepared common DLL for plugins using this engine. AutoRepair's test project only links its repair patch. Mod-specific plugin doubles live in `TestDoubles/`, Harmony integration checks in `Integration/`, and CraftFromStorage's standalone behavioral checks in `Behavior/`. The mods' tests do not depend on one another.
 
 Test entry points only run suites and print totals. Each suite registers descriptive test methods with the shared `TestRunner`; each test has a short XML `<summary>` stating its expected behavior and arranges its own initial state. Related assertions may stay together when they evaluate one scenario, but unrelated scenarios must not depend on state left by earlier tests. Reuse fixture builders instead of copying setup code. Harmony patches are installed once per suite and always removed in `finally`.
 
 The runner reports each test's class/method name, identifies that method when an assertion fails, and prints separate test and assertion totals. To add coverage, write a documented scenario method and register it with `runner.Run(...)` in the relevant suite.
 
-All three projects reference [ValheimMods.Testing](../tests/ValheimMods.Testing/), a neutral test-support library organized into `GameStubs/`, `UnityStubs/` and `Logging/`. It contains no mod-specific types or production references. Its API doubles retain game/Unity names and namespaces so production patches can target them unchanged.
+All four mod test projects reference [ValheimMods.Testing](../tests/ValheimMods.Testing/), a neutral test-support library organized into `GameStubs/`, `UnityStubs/` and `Logging/`. It contains no mod-specific types or production references. Its API doubles retain game/Unity names and namespaces so production patches can target them unchanged.
 
 The tests apply HarmonyX patches to game stubs, not a live Unity instance. The profile's older Harmony remains the production reference, while a .NET-compatible HarmonyX version runs each test executable. The signature validator uses the profile's Mono.Cecil DLL to check Harmony bindings against the installed game. Neither replaces the [in-game test checklist](../CraftFromStorage/README.md#in-game-review-checklist), especially multiplayer ownership and inventory persistence. Keep other craft-from-storage plugins disabled during CraftFromStorage tests.
 
 The shared icon renderer uses an isolated headless Microsoft Edge profile to rasterize the original SVG with the shared frame, then writes a 256x256 PNG. It does not launch Valheim.
+
+## CookFromStorage
+
+```powershell
+.\CookFromStorage\scripts\build.ps1
+.\scripts\Validate-ModPatches.ps1 -ModDirectory .\CookFromStorage
+dotnet run --project .\CookFromStorage\tests\CookFromStorage.Tests.csproj --configuration Release
+.\CookFromStorage\scripts\build.ps1 -Deploy
+.\scripts\Render-ModIcon.ps1 -ModDirectory .\CookFromStorage
+```
+
+CookFromStorage intercepts `CookingStation.OnInteract`, reached from direct interactions and food switches, only when vanilla has no finished item to collect and no accepted ingredient in the player's inventory. It selects a current `CookingStation.m_conversion` input from locally owned, accessible storage, checks fire/capacity/range again before mutation, and inserts through the station RPC. A separate `Fermenter.Interact` prefix supplies an accepted base only to an empty, sheltered, ward-accessible Fermenter with no accepted inventory input; held interactions, running batches, collection and explicit item use remain vanilla. Both paths reuse a local storage-input transaction helper, confirm station-specific committed state, and skip remote-owned stations/storage. The shared [Processing reference](reference/Processing.md) documents the inspected callbacks and limits. Stub tests and signature validation do not replace in-game checks of prefab conversions, multiplayer ownership or persistence. Test Fermenter input priority, roof/exposure messages, batch collection without reloading, and save/reload state before release.
+
+Run `.\CookFromStorage\scripts\pack.ps1` after testing and review. The package includes `ValheimMods.Common.dll`, which must be installed beside CookFromStorage.
 
 ## SupplyFromStorage preview
 
@@ -121,7 +140,7 @@ dotnet run --project .\SupplyFromStorage\tests\SupplyFromStorage.Tests.csproj --
 
 Fuel automation and processing-input automation are separate BepInEx settings, both enabled by default. The mod hooks fireplace interaction and cooking-station/smelter fuel/input switch callbacks, transferring at most one item per valid E action. Vanilla repeat timing governs held E; station update callbacks do not supply items. On `Smelter.OnAddOre`, a prefix preserves accepted player-inventory inputs and supplies from storage only if vanilla inventory has no accepted item; it skips the misleading no-processable-items message only after confirming a storage transfer, while preserving the vanilla full-station message. It does not insert cooking ingredients or fermenter bases. To avoid competing ownership RPCs and duplicate consumption, only locally owned machines and containers are used; remote-owned storage is skipped. Vanilla interactions that already consume a player-inventory item, including fire toggles, are preserved. CraftFromStorage's crafting/count/removal patches are not modified, and SupplyFromStorage does not patch those APIs.
 
-The [fuel and processing API reference](reference/Processing.md) records the verified interaction callback signatures, inspected `Smelter.OnAddOre` feedback path and unresolved prefab/input mappings. The focused .NET 10 test executable links SupplyFromStorage's production access, transfer and Harmony patch code to the shared test helpers, with test-only station doubles. Its conversion-list cases model several item names on a `Smelter` double; they do not prove that the corresponding live prefabs use that component or accept those inputs. The suite also exercises one-item-per-action behavior, hold-repeat guards, capacity, no load/update automation, storage-aware smelter feedback, the inclusive 20m player-centered range, inaccessible/busy and stale storage, retry throttling, independent toggles and the CraftFromStorage inventory-hook boundary. Stubs do not emulate live Unity, Valheim networking or persistence. The signature validator confirms Harmony bindings against the installed game assembly; it does not prove runtime patch resolution. Verify each supported station prefab, held-E behavior, concurrent multiplayer access and saved inventory state in game before release.
+The [fuel and processing API reference](reference/Processing.md) records the verified interaction callback signatures, inspected `Smelter.OnAddOre` feedback path and unresolved prefab/input mappings. The focused .NET 10 test executable links SupplyFromStorage's production access, transfer and Harmony patch code to the shared test helpers, with test-only station doubles. Its conversion-list cases model several item names on a `Smelter` double; they do not prove that the corresponding live prefabs use that component or accept those inputs. The suite also exercises one-item-per-action behavior, hold-repeat guards, capacity, no load/update automation, storage-aware smelter feedback, the inclusive player-centered range (default 20m, configurable storage radius clamped to 1–100m, fixed 20m station reach), inaccessible/busy and stale storage, retry throttling, independent toggles and the CraftFromStorage inventory-hook boundary. Stubs do not emulate live Unity, Valheim networking or persistence. The signature validator confirms Harmony bindings against the installed game assembly; it does not prove runtime patch resolution. Verify each supported station prefab, held-E behavior, concurrent multiplayer access and saved inventory state in game before release.
 
 ## Shared tools and artwork
 

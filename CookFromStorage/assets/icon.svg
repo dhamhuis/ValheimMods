@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>CookFromStorage mod icon</title>
+  <desc>A chest supplies a steaming pot of golden soup with herbs and a wooden spoon inside the shared wood frame.</desc>
+  <defs>
+    <linearGradient id="cookChest" x2="0" y2="1">
+      <stop stop-color="#a37646"/>
+      <stop offset="1" stop-color="#483021"/>
+    </linearGradient>
+    <linearGradient id="cookGold">
+      <stop stop-color="#f3d396"/>
+      <stop offset="1" stop-color="#b17639"/>
+    </linearGradient>
+    <linearGradient id="cookSoup" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#f4d28c"/>
+      <stop offset="1" stop-color="#ca692f"/>
+    </linearGradient>
+    <linearGradient id="cookMetal" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#82958b"/>
+      <stop offset="1" stop-color="#34443e"/>
+    </linearGradient>
+  </defs>
+  <image href="../../assets/icons/valheim-panel.svg" width="512" height="512"/>
+  <g stroke="#17110d" stroke-width="9" stroke-linejoin="round">
+    <path d="M133 249 L273 249 L283 282 L283 352 L133 352 Z" fill="url(#cookChest)"/>
+    <path d="M133 249 Q203 214 273 249 L283 282 L133 282 Z" fill="url(#cookChest)"/>
+    <path d="M158 248 L158 352 M254 245 L254 352 M133 282 L283 282" fill="none" stroke="#9b9b81" stroke-width="12"/>
+    <rect x="195" y="276" width="28" height="33" rx="3" fill="url(#cookGold)"/>
+  </g>
+  <path d="M193 193 Q250 127 310 178 L288 174 M310 178 L306 155"
+    fill="none" stroke="#f3d396" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <g stroke="#191513" stroke-width="9" stroke-linejoin="round">
+    <path d="M315 274 L319 325 Q322 353 355 356 Q388 353 391 325 L395 274 Z" fill="url(#cookMetal)"/>
+    <ellipse cx="355" cy="274" rx="40" ry="16" fill="url(#cookSoup)"/>
+    <g transform="translate(316 0) scale(0.6666666667 1) translate(-316 0)" fill="none" stroke-linecap="round">
+      <path d="M316 283 L301 283 C286 283 286 296 301 296 L326 296 Q331 296 330 292" stroke-width="9"/>
+      <path d="M316 283 L301 283 C286 283 286 296 301 296 L326 296 Q331 296 330 292" stroke="#9b9b81" stroke-width="5"/>
+    </g>
+    <g transform="translate(394 0) scale(0.6666666667 1) translate(-394 0)" fill="none" stroke-linecap="round">
+      <path d="M394 283 L409 283 C424 283 424 296 409 296 L384 296 Q379 296 380 292" stroke-width="9"/>
+      <path d="M394 283 L409 283 C424 283 424 296 409 296 L384 296 Q379 296 380 292" stroke="#9b9b81" stroke-width="5"/>
+    </g>
+    <path d="M361 276 L393 228 Q397 223 402 227 Q407 231 402 236 L371 282 Z" fill="#a37646" stroke-width="6"/>
+    <path d="M335 274 Q334 258 349 264 Q350 277 335 274 M352 281 Q356 266 369 274 Q365 285 352 281"
+      fill="#7f9a59" stroke-width="4"/>
+    <path d="M332 304 Q334 330 350 336" fill="none" stroke="#b1b8a0" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <g fill="none" stroke="#f3d396" stroke-width="7" stroke-linecap="round">
+    <path d="M329 244 C316 230 342 222 329 208 M352 237 C339 223 365 215 352 201 M375 244 C362 230 388 222 375 208"/>
+  </g>
+  <image href="../../assets/icons/valheim-wood-frame.svg" x="0" y="0" width="512" height="512"/>
+</svg>

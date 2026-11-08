@@ -4,7 +4,18 @@ AutoRepair by Hoose repairs eligible equipment in the local player's inventory w
 
 The [Thunderstore README](Thunderstore/README.md) is the player-facing page included in the release package. This README describes the mod's behavior and implementation.
 
-## Behavior
+## Supported repair stations
+
+AutoRepair supports all four vanilla equipment-repair stations:
+
+- **Workbench**
+- **Forge**
+- **Black Forge**
+- **Galdr Table**
+
+The station must be usable and meet the equipment's normal repair requirements. The Artisan Table, Stonecutter and food recipe stations are not ordinary vanilla equipment-repair stations; upgrades belong to their parent station rather than acting as separate repair stations. Compatible modded crafting stations are supported when Valheim's repair rules assign equipment to them.
+
+## Repair behavior
 
 | Aspect | Behavior |
 | --- | --- |

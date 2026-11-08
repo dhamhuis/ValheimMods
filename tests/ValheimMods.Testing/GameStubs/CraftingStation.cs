@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 public class CraftingStation
 {
     public bool m_upgrader;
+    public string m_name = "$piece_workbench";
 
     public bool Usable { get; set; } = true;
 

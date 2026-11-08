@@ -1,54 +1,41 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ValheimMods.Common;
 
 namespace SupplyFromStorage;
 
 internal static class NearbyStorage
 {
-    internal const float Radius = 20f;
+    private static readonly ContainerRegistry _registry = new();
 
-    private static readonly HashSet<Container> _containers = new();
+    internal static float Radius => StorageRange.Clamp(SupplyFromStoragePlugin.StorageRadius);
 
     internal static void Initialize()
     {
-        Clear();
-
-        foreach (var container in Object.FindObjectsByType<Container>(FindObjectsSortMode.None))
-        {
-            Add(container);
-        }
+        _registry.Initialize();
     }
 
     internal static void Add(Container container)
     {
         if (container != null)
         {
-            _containers.Add(container);
+            _registry.Add(container);
         }
     }
 
     internal static void Remove(Container container)
     {
-        _containers.Remove(container);
+        _registry.Remove(container);
     }
 
     internal static void Clear()
     {
-        _containers.Clear();
+        _registry.Clear();
     }
 
     internal static bool IsAccessible(Container container, Player player)
     {
-        return container != null && container.isActiveAndEnabled && player != null
-            && container.m_nview != null && container.m_nview.IsValid()
-            && container.GetInventory() != null
-            && (container.transform.position - player.transform.position).sqrMagnitude <= Radius * Radius
-            && !container.IsInUse()
-            && (container.IsOwner() || container.m_nview.GetZDO().GetInt(ZDOVars.s_inUse, 0) == 0)
-            && (container.m_wagon == null || !container.m_wagon.InUse())
-            && container.CheckAccess(player.GetPlayerID())
-            && (!container.m_checkGuardStone
-                || PrivateArea.CheckAccess(container.transform.position, 0f, false, false));
+        return ContainerRegistry.IsAccessible(container, player, Radius);
     }
 
     internal static List<Container> Find(Player player)
@@ -60,9 +47,9 @@ internal static class NearbyStorage
             return result;
         }
 
-        _containers.RemoveWhere(container => container == null);
+        _registry.PruneDestroyed();
 
-        foreach (var container in _containers)
+        foreach (var container in _registry.Containers)
         {
             if (!IsAccessible(container, player) || !container.IsOwner())
             {

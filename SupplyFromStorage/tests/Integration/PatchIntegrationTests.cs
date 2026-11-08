@@ -10,7 +10,7 @@ internal static class PatchIntegrationTests
 {
     internal static void Run(TestRunner runner)
     {
-        var harmony = new Harmony("Hoose.valheim.supplyfromstorage.tests");
+        var harmony = new Harmony("hoose.valheim.supplyfromstorage.tests");
 
         try
         {
@@ -19,6 +19,8 @@ internal static class PatchIntegrationTests
             runner.Run(SwitchCallbacksSupplyOneItemPerUse);
             runner.Run(SmelterMessagesReflectAvailableInputs);
             runner.Run(CookingStationFuelSwitchSuppliesOnlyFuel);
+            runner.Run(FrostKilnFuelMessagesReflectStorage);
+            runner.Run(FrostFoundryFuelMessagesReflectStorage);
             runner.Run(AutomationTogglesAreIndependent);
             runner.Run(StationUpdatesDoNotSupplyItems);
             runner.Run(CraftFromStorageInventoryHookDoesNotInterceptTransfers);
@@ -236,6 +238,86 @@ internal static class PatchIntegrationTests
         station.OnAddFuelSwitch(new Switch(), player, null);
         check(station.Fuel == 1 && chest.Inventory.Items[0].m_stack == 1,
             "Vanilla cooking-station fuel insertion also consumed storage fuel.");
+    }
+
+    /// <summary>Ice-as-fuel uses storage without a premature missing-ice message.</summary>
+    private static void FrostKilnFuelMessagesReflectStorage(Action<bool, string> check)
+    {
+        CheckFuelMessages(check, false, "$item_ice");
+    }
+
+    /// <summary>Foundry fuel uses storage without a premature missing-liquid-frost message.</summary>
+    private static void FrostFoundryFuelMessagesReflectStorage(Action<bool, string> check)
+    {
+        CheckFuelMessages(check, true, "$item_frozenfuel");
+    }
+
+    private static void CheckFuelMessages(Action<bool, string> check, bool cookingStation, string fuelName)
+    {
+        var player = Reset();
+        var chest = Chest(1, 0, 0, Item(fuelName, 3));
+        var fuelDrop = StationDrop("TestFuel", fuelName);
+        var oven = new CookingStation { m_fuelItem = fuelDrop, m_maxFuel = 3 };
+        var smelter = new Smelter { m_fuelItem = fuelDrop, m_maxFuel = 3 };
+        oven.transform.position = smelter.transform.position = new Vector3(1, 0, 0);
+        Func<ItemDrop.ItemData, bool> interact = item => cookingStation
+            ? oven.OnAddFuelSwitch(new Switch(), player, item)
+            : smelter.OnAddFuel(new Switch(), player, item);
+        Func<float> fuel = () => cookingStation ? oven.Fuel : smelter.Fuel;
+
+        bool result = interact(null);
+        check(result && fuel() == 1 && chest.Inventory.Items[0].m_stack == 2,
+            "Northern fuel transfer did not consume exactly one storage fuel item.");
+        check(player.Messages.Count == 1 && player.Messages[0] == "$msg_added " + fuelName,
+            "A no-fuel message appeared before the successful storage-fuel message.");
+
+        player.Messages.Clear();
+        player.Inventory.Items.Add(Item(fuelName, 1));
+        result = interact(null);
+        check(result && fuel() == 2 && player.Inventory.Items.Count == 0 && chest.Inventory.Items[0].m_stack == 2
+            && player.Messages.Count == 1 && player.LastMessage == "$msg_added " + fuelName,
+            "Inventory-first fuel handling was changed or storage was also consumed.");
+
+        player.Messages.Clear();
+        var wrongItem = Item("$item_wrong", 1);
+        player.Inventory.Items.Add(wrongItem);
+        result = interact(wrongItem);
+        check(!result && fuel() == 2 && chest.Inventory.Items[0].m_stack == 2
+            && player.LastMessage == "$msg_wrongitem",
+            "Explicit wrong-item handling was replaced by storage fueling.");
+
+        player.Inventory.Items.Clear();
+        player.Messages.Clear();
+        result = interact(null);
+        check(result && fuel() == 3 && chest.Inventory.Items[0].m_stack == 1 && player.Messages.Count == 1,
+            "Repeated valid fuel interactions were throttled or emitted multiple messages.");
+
+        player.Messages.Clear();
+        result = interact(null);
+        check(!result && fuel() == 3 && chest.Inventory.Items[0].m_stack == 1
+            && player.LastMessage == "$msg_itsfull", "Full-station feedback or capacity guard was lost.");
+
+        oven.Fuel = smelter.Fuel = 0;
+        chest.Inventory.Items.Clear();
+        player.Messages.Clear();
+        result = interact(null);
+        check(!result && fuel() == 0 && player.LastMessage == "$msg_donthaveany " + fuelName,
+            "Missing fuel in both inventory and storage no longer showed vanilla's message.");
+
+        SupplyTransfer.Clear();
+        chest.Inventory.Items.Add(Item(fuelName, 1));
+        SupplyFromStoragePlugin.FuelAutomationEnabled = false;
+        player.Messages.Clear();
+        result = interact(null);
+        check(!result && fuel() == 0 && chest.Inventory.Items[0].m_stack == 1
+            && player.LastMessage == "$msg_donthaveany " + fuelName,
+            "Disabled automation consumed fuel or suppressed vanilla feedback.");
+
+        SupplyFromStoragePlugin.FuelAutomationEnabled = true;
+        chest.Allowed = false;
+        result = interact(null);
+        check(!result && fuel() == 0 && chest.Inventory.Items[0].m_stack == 1,
+            "Inaccessible storage was used for fuel.");
     }
 
     /// <summary>Fuel and processing-input configuration switches do not control each other.</summary>

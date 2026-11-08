@@ -1,10 +1,19 @@
 # AutoRepair
 
+**Open a crafting station and get back to adventuring with repaired gear. No repeated repair-button clicks.**
+
+## Supported repair stations
+
+- **Workbench** - repair eligible early-game tools, weapons and armor.
+- **Forge** - repair eligible metal equipment.
+- **Black Forge** - repair eligible advanced weapons, armor and tools.
+- **Galdr Table** - repair eligible magical weapons and mage armor.
+
+Compatible modded crafting stations are also supported when their equipment is repairable there under the game's normal rules.
+
+AutoRepair repairs eligible damaged equipment in your inventory when you interact with its station, including unequipped items. Use the station your gear normally requires.
+
 By Hoose.
-
-## What it does
-
-Automatically repairs eligible tools, weapons, and armor in your inventory when you interact with a crafting station. No repeated repair-button clicks are needed.
 
 ## Vanilla rules still apply
 
@@ -15,11 +24,20 @@ Automatically repairs eligible tools, weapons, and armor in your inventory when 
 
 The mod uses Valheim's own repair methods. Automatic repairs happen on station interaction, not continuously while its panel is open.
 
-## Requirements
+## Installation
 
-- Valheim
-- BepInExPack_Valheim
+Install with r2modman or the Thunderstore Mod Manager. Requires **BepInExPack_Valheim**, which the mod manager installs for you.
 
-AutoRepair runs on the player's client; a server-side installation is not required for this feature.
+For manual installation, copy `plugins/AutoRepair.dll` into `BepInEx/plugins/AutoRepair/`.
+
+AutoRepair runs on each player's client; a server installation is not required.
+
+## Configuration
+
+None needed. AutoRepair works as soon as it is installed.
+
+## Stack with other mods
+
+Works well with [CraftFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CraftFromStorage) (craft and upgrade from nearby chests), [CookFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CookFromStorage) (cooking and brewing from storage) and [SupplyFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/SupplyFromStorage) (fuel and machine inputs from storage). Walk up to and use the Forge: your gear is repaired, and the upgrade materials come straight from your chests.
 
 [Project and support](https://github.com/dhamhuis/ValheimMods)

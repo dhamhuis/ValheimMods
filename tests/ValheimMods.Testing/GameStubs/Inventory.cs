@@ -11,6 +11,8 @@ public class Inventory
 
     public bool ContainsItem(ItemDrop.ItemData item) => Items.Contains(item);
 
+    public bool HaveItem(string name, bool matchWorldLevel) => CountItems(name, -1, matchWorldLevel) > 0;
+
     public bool AddItem(ItemDrop.ItemData item)
     {
         if (item == null)

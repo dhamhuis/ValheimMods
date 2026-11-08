@@ -11,6 +11,7 @@ internal static class StorageBehaviorTests
     internal static void Run(TestRunner runner)
     {
         runner.Run(DiscoveryUsesInclusiveSphere);
+        runner.Run(ConfiguredRadiusBoundsDiscovery);
         runner.Run(PersonalPermissionsExcludeStorage);
         runner.Run(WardsExcludeStorage);
         runner.Run(LocalBusyFlagExcludesStorage);
@@ -52,6 +53,28 @@ internal static class StorageBehaviorTests
         Chest(0, 20.001f, 0, Item("wood", 100));
         Chest(15, 15, 0, Item("wood", 100));
         check(NearbyStorage.Find(player).SequenceEqual([boundary]), "Discovery did not use an inclusive sphere.");
+    }
+
+    /// <summary>The configured radius bounds discovery inclusively and is clamped to 1-100m.</summary>
+    private static void ConfiguredRadiusBoundsDiscovery(Action<bool, string> check)
+    {
+        var player = Reset();
+        Radius = 5f;
+        var boundary = Chest(0, 5, 0, Item("wood", 2));
+        var outside = Chest(0, 5.001f, 0, Item("wood", 2));
+        check(NearbyStorage.Find(player, true).SequenceEqual([boundary]), "A 5m radius did not bound discovery inclusively.");
+
+        Radius = 100f;
+        var far = Chest(0, 100, 0, Item("wood", 2));
+        check(NearbyStorage.Find(player, true).SequenceEqual([boundary, outside, far]), "Storage at the 100m maximum was excluded.");
+
+        Radius = 500f;
+        Chest(0, 100.01f, 0, Item("wood", 2));
+        check(NearbyStorage.Find(player, true).Count == 3, "A radius above 100m was not clamped.");
+
+        Radius = 0f;
+        Chest(0, 1, 0, Item("wood", 2));
+        check(NearbyStorage.Find(player, true).Count == 1, "A radius below 1m was not clamped.");
     }
 
     /// <summary>Personal chest permissions exclude otherwise nearby storage.</summary>

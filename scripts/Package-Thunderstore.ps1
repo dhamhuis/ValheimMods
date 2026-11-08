@@ -17,6 +17,8 @@ if ($projects.Count -ne 1) { throw "Expected one project in $sourceDirectory; fo
 $properties = $project.Project.PropertyGroup | Where-Object { $_.AssemblyName -or $_.TargetFramework } | Select-Object -First 1
 $assemblyName = [string]$properties.AssemblyName
 $projectVersion = [string]$properties.Version
+$usesCommonLibrary = @($project.Project.ItemGroup.ProjectReference |
+    Where-Object { $_.Include -like '*ValheimMods.Common.csproj' }).Count -gt 0
 $packageDirectory = Join-Path $modRoot 'Thunderstore'
 $manifestPath = Join-Path $packageDirectory 'manifest.json'
 if (-not (Test-Path -LiteralPath $manifestPath)) { throw "Package manifest not found: $manifestPath" }
@@ -55,6 +57,11 @@ $files = [ordered]@{
     'icon.png' = (Join-Path $packageDirectory 'icon.png')
     'CHANGELOG.md' = (Join-Path $modRoot 'CHANGELOG.md')
     "plugins/$assemblyName.dll" = $pluginDll
+}
+$commonDll = Join-Path $distDirectory 'ValheimMods.Common.dll'
+if ($usesCommonLibrary) {
+    if (-not (Test-Path -LiteralPath $commonDll)) { throw "Shared runtime library not found: $commonDll" }
+    $files['plugins/ValheimMods.Common.dll'] = $commonDll
 }
 try {
     $archive = [System.IO.Compression.ZipFile]::Open($temporaryPath, [System.IO.Compression.ZipArchiveMode]::Create)

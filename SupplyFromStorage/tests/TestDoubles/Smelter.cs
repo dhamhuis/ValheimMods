@@ -53,8 +53,22 @@ public class Smelter
     public bool OnAddFuel(Switch sw, Humanoid user, ItemDrop.ItemData item)
     {
         if (m_fuelItem?.m_itemData?.m_shared == null
-            || System.Math.Ceiling(Fuel) >= m_maxFuel || user is not Player player)
+            || user is not Player player)
         {
+            return false;
+        }
+
+        if (item != null && item.m_shared.m_name != m_fuelItem.m_itemData.m_shared.m_name)
+        {
+            user.Message(MessageHud.MessageType.Center, "$msg_wrongitem", 0, null, false);
+
+            return false;
+        }
+
+        if (Fuel > m_maxFuel - 1)
+        {
+            user.Message(MessageHud.MessageType.Center, "$msg_itsfull", 0, null, false);
+
             return false;
         }
 
@@ -64,9 +78,13 @@ public class Smelter
 
         if (item == null || !player.Inventory.RemoveItem(item, 1))
         {
+            user.Message(MessageHud.MessageType.Center,
+                "$msg_donthaveany " + m_fuelItem.m_itemData.m_shared.m_name, 0, null, false);
+
             return false;
         }
 
+        user.Message(MessageHud.MessageType.Center, "$msg_added " + m_fuelItem.m_itemData.m_shared.m_name, 0, null, false);
         RPC_AddFuel(player.GetPlayerID());
 
         return Fuel > 0;

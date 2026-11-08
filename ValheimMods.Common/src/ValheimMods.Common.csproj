@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>ValheimMods.Common</AssemblyName>
+    <RootNamespace>ValheimMods.Common</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <Version>1.0.0</Version>
+    <Authors>Hoose</Authors>
+    <Company>Hoose</Company>
+    <Product>ValheimMods.Common</Product>
+    <Description>Shared runtime helpers for Hoose's Valheim mods.</Description>
+    <Copyright>Copyright (c) Hoose 2026</Copyright>
+    <ValheimInstallDir Condition="'$(ValheimInstallDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimInstallDir>
+    <ValheimManagedDir Condition="'$(ValheimManagedDir)' == ''">$(ValheimInstallDir)\valheim_Data\Managed</ValheimManagedDir>
+    <R2ModmanProfileDir Condition="'$(R2ModmanProfileDir)' == ''">$(APPDATA)\r2modmanPlus-local\Valheim\profiles\Valheim Mod Building</R2ModmanProfileDir>
+    <BepInExCoreDir Condition="'$(BepInExCoreDir)' == ''">$(R2ModmanProfileDir)\BepInEx\core</BepInExCoreDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <Optimize>true</Optimize>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime;build;native;contentfiles;analyzers;buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony"><HintPath>$(BepInExCoreDir)\0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="assembly_valheim" Publicize="true"><HintPath>$(ValheimManagedDir)\assembly_valheim.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ValheimManagedDir)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(ValheimManagedDir)\UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UIModule"><HintPath>$(ValheimManagedDir)\UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UI"><HintPath>$(ValheimManagedDir)\UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <Target Name="ValidateBuildReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(ValheimManagedDir)\assembly_valheim.dll')" Text="Valheim managed assemblies not found. Set ValheimInstallDir or ValheimManagedDir." />
+  </Target>
+</Project>

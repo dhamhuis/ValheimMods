@@ -11,6 +11,7 @@ internal static class SupplyTestSetup
         SupplyTransfer.Clear();
         SupplyFromStoragePlugin.FuelAutomationEnabled = true;
         SupplyFromStoragePlugin.ProcessingAutomationEnabled = true;
+        SupplyFromStoragePlugin.StorageRadius = 20f;
         PrivateArea.Allowed = true;
         Time.time = 0;
         Time.realtimeSinceStartup = 0;

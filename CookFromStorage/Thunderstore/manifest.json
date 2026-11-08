@@ -1,0 +1,7 @@
+{
+    "name": "CookFromStorage",
+    "description": "Adds accepted cooking ingredients from nearby storage to cooking stations.",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/dhamhuis/ValheimMods",
+    "dependencies": ["denikson-BepInExPack_Valheim-5.4.2360"]
+}

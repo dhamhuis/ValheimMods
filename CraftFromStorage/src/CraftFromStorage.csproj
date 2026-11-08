@@ -12,7 +12,7 @@
     <Authors>Hoose</Authors>
     <Company>Hoose</Company>
     <Product>Valheim CraftFromStorage</Product>
-    <Description>Crafts and upgrades at stations using accessible storage within 20 meters of the player.</Description>
+    <Description>Crafts and upgrades at stations using accessible storage near the player (20 m by default, configurable).</Description>
     <Copyright>Copyright (c) Hoose 2026</Copyright>
     <ValheimInstallDir Condition="'$(ValheimInstallDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimInstallDir>
     <ValheimManagedDir Condition="'$(ValheimManagedDir)' == ''">$(ValheimInstallDir)\valheim_Data\Managed</ValheimManagedDir>
@@ -28,6 +28,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime;build;native;contentfiles;analyzers;buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ValheimMods.Common\src\ValheimMods.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="BepInEx"><HintPath>$(BepInExCoreDir)\BepInEx.dll</HintPath><Private>false</Private></Reference>

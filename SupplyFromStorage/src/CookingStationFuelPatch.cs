@@ -5,13 +5,20 @@ namespace SupplyFromStorage;
 [HarmonyPatch(typeof(CookingStation), "OnAddFuelSwitch")]
 internal static class CookingStationFuelPatch
 {
-    [HarmonyPostfix]
-    private static void AfterFuelRequested(
+    [HarmonyPrefix]
+    private static bool BeforeFuelRequested(
         CookingStation __instance,
         Humanoid user,
         ItemDrop.ItemData item,
-        bool __result)
+        ref bool __result)
     {
-        SupplyTransfer.CookingStationFuelRequested(__instance, user, item, __result);
+        if (!SupplyTransfer.TryHandleCookingStationFuel(__instance, user, item))
+        {
+            return true;
+        }
+
+        __result = true;
+
+        return false;
     }
 }

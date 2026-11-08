@@ -21,11 +21,21 @@ if (-not $BepInExCoreDir) { $BepInExCoreDir = Join-Path $R2ModmanProfileDir 'Bep
 Add-Type -Path (Join-Path $BepInExCoreDir 'Mono.Cecil.dll')
 $game = $null
 $plugin = $null
+$common = $null
 $checked = 0
 try {
     $game = [Mono.Cecil.AssemblyDefinition]::ReadAssembly((Join-Path $ValheimInstallDir 'valheim_Data\Managed\assembly_valheim.dll'))
     $plugin = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($pluginPath)
-    foreach ($type in $plugin.MainModule.Types) {
+    $assemblies = @($plugin)
+    if (@($plugin.MainModule.GetTypeReferences() | Where-Object {
+        $_.FullName -eq 'ValheimMods.Common.Crafting.RecipeStorage'
+    }).Count -gt 0) {
+        $commonPath = Join-Path $modRoot 'dist\ValheimMods.Common.dll'
+        if (-not (Test-Path -LiteralPath $commonPath)) { throw "Shared recipe engine DLL not found: $commonPath" }
+        $common = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($commonPath)
+        $assemblies += $common
+    }
+    foreach ($type in ($assemblies | ForEach-Object { $_.MainModule.Types })) {
         $attributes = @($type.CustomAttributes | Where-Object { $_.AttributeType.FullName -eq 'HarmonyLib.HarmonyPatch' })
         if ($attributes.Count -eq 0) { continue }
         if ($attributes.Count -ne 1) { throw "$($type.Name): only a single class-level HarmonyPatch attribute is supported." }
@@ -76,6 +86,7 @@ try {
     Write-Output "Verified $checked Harmony patch method signatures for $assemblyName against the installed game. In-game startup is still required."
 }
 finally {
+    if ($common) { $common.Dispose() }
     if ($plugin) { $plugin.Dispose() }
     if ($game) { $game.Dispose() }
 }

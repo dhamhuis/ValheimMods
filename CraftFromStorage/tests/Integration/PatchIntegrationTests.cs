@@ -1,5 +1,4 @@
 using System;
-using HarmonyLib;
 using UnityEngine;
 using ValheimMods.Testing;
 using static CraftFromStorage.Tests.CraftingTestSetup;
@@ -10,11 +9,8 @@ internal static class PatchIntegrationTests
 {
     internal static void Run(TestRunner runner)
     {
-        var harmony = new Harmony("Hoose.valheim.craftfromstorage.tests");
-
         try
         {
-            harmony.PatchAll(typeof(PatchIntegrationTests).Assembly);
             runner.Run(RequirementCheckIncludesStorage);
             runner.Run(DiscoveryDoesNotLearnFromStorage);
             runner.Run(RequirementDisplayIncludesStorage);
@@ -45,7 +41,6 @@ internal static class PatchIntegrationTests
         finally
         {
             Reset();
-            harmony.UnpatchSelf();
         }
     }
 

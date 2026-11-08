@@ -5,9 +5,23 @@ namespace CraftFromStorage.Tests;
 
 internal static class CraftingTestSetup
 {
+    private static RecipeStorage _recipeStorage;
+
+    internal static float Radius { get; set; } = 20f;
+
     internal static Player Reset()
     {
         CraftFromStoragePlugin.Instance.Clear();
+        Radius = 20f;
+        _recipeStorage?.Dispose();
+        _recipeStorage = RecipeStorage.Register(
+            false,
+            CraftFromStoragePlugin.Instance.StartCoroutine,
+            CraftFromStoragePlugin.Instance.Clear,
+            CraftFromStoragePlugin.Log.LogWarning,
+            CraftFromStoragePlugin.Log.LogError,
+            () => true,
+            () => Radius);
         NearbyStorage.Clear();
         StorageCrafting.Clear();
         InventoryGui.instance = new InventoryGui();

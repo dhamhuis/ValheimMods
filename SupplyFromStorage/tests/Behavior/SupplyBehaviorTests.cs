@@ -17,6 +17,7 @@ internal static class SupplyBehaviorTests
         runner.Run(FuelAndInputCapacityAreNeverExceeded);
         runner.Run(FailedMachineInsertionRestoresStorage);
         runner.Run(StorageAndStationsUseInclusivePlayerCenteredRange);
+        runner.Run(ConfiguredStorageRadiusLimitsStorageButNotStationReach);
         runner.Run(InaccessibleAndBusyContainersAreSkipped);
         runner.Run(StaleContainersAndQuantitiesAreRevalidated);
         runner.Run(RemoteOwnedStorageIsNotConsumed);
@@ -238,6 +239,38 @@ internal static class SupplyBehaviorTests
         check(!NearbyStorage.Find(Player.m_localPlayer).Contains(outsideChest), "Storage outside the sphere was included.");
         check(SupplyTransfer.TransferFireplaceFuel(nearbyFireplace, Player.m_localPlayer, NearbyStorage.Find(Player.m_localPlayer))
             == SupplyTransfer.TransferResult.NoItems, "Out-of-range storage supplied fuel.");
+    }
+
+    /// <summary>The configured radius bounds storage within 1-100m; station reach stays fixed at 20m.</summary>
+    private static void ConfiguredStorageRadiusLimitsStorageButNotStationReach(Action<bool, string> check)
+    {
+        var player = Reset();
+        SupplyFromStoragePlugin.StorageRadius = 5f;
+        var outside = Chest(0, 5.01f, 0, Item("$item_wood", 1));
+        var edge = Chest(0, 5, 0, Item("$item_wood", 1));
+        var fireplace = new Fireplace
+        {
+            m_fuelItem = StationDrop("Wood", "$item_wood"),
+            m_maxFuel = 2
+        };
+        fireplace.transform.position = new Vector3(15, 0, 0);
+
+        var containers = NearbyStorage.Find(player);
+        check(containers.Contains(edge) && !containers.Contains(outside), "A 5m radius did not bound storage inclusively.");
+        check(SupplyTransfer.TransferFireplaceFuel(fireplace, player, containers) == SupplyTransfer.TransferResult.Transferred
+            && edge.Inventory.Items.Count == 0 && outside.Inventory.Items.Count == 1,
+            "A small storage radius blocked a station within normal reach or used out-of-range storage.");
+
+        SupplyFromStoragePlugin.StorageRadius = 100f;
+        var far = Chest(0, 100, 0, Item("$item_wood", 1));
+        check(NearbyStorage.Find(player).Contains(far), "Storage at the 100m maximum was excluded.");
+
+        SupplyFromStoragePlugin.StorageRadius = 500f;
+        var beyond = Chest(0, 100.01f, 0, Item("$item_wood", 1));
+        check(!NearbyStorage.Find(player).Contains(beyond), "A radius above 100m was not clamped.");
+
+        SupplyFromStoragePlugin.StorageRadius = 0f;
+        check(NearbyStorage.Radius == 1f, "A radius below 1m was not clamped.");
     }
 
     /// <summary>Personal, warded, locally busy and remotely busy containers are unavailable.</summary>

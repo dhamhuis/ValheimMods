@@ -1,8 +1,8 @@
-using System.Linq;
-using System.Reflection;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
-using HarmonyLib;
+using ValheimMods.Common;
+using ValheimMods.Common.Crafting;
 
 namespace CraftFromStorage;
 
@@ -13,58 +13,61 @@ public sealed class CraftFromStoragePlugin : BaseUnityPlugin
     public const string PluginName = "CraftFromStorage";
     public const string PluginAuthor = "Hoose";
 
-    // Keep the installed plugin identity stable when author branding changes.
-    public const string PluginGuid = "dhamhuis.valheim.craftfromstorage";
+    // Changing this GUID renames the config file and breaks dependents; keep it stable after release.
+    public const string PluginGuid = "hoose.valheim.craftfromstorage";
     public const string PluginVersion = "1.0.0";
 
-    private Harmony _harmony;
+    private const string StorageRadiusDescription =
+        "How far, in meters, CraftFromStorage searches for storage around you (a sphere centred on your character). Allowed range: 1 to 100.\n"
+        + "Applies to recipes and upgrades at non-food crafting stations such as the Workbench, Forge, Stonecutter, Artisan Table, Black Forge and Galdr Table.\n"
+        + "Cauldron, Food Preparation Table and Mead Ketill recipes are handled by CookFromStorage and use its own setting. Only storage you could normally open is used.";
+
+    private static ConfigEntry<float> _storageRadius;
+    private RecipeStorage _recipeStorage;
 
     internal static CraftFromStoragePlugin Instance { get; private set; }
 
     internal static ManualLogSource Log { get; private set; }
 
+    internal static float StorageRadius => StorageRange.Clamp(_storageRadius?.Value ?? StorageRange.DefaultRadius);
+
     private void Awake()
     {
         Instance = this;
         Log = Logger;
-        _harmony = new Harmony(PluginGuid);
-        _harmony.PatchAll(typeof(CraftFromStoragePlugin).Assembly);
-        var patchMethods = typeof(CraftFromStoragePlugin).Assembly.GetTypes()
-            .Where(type => type.GetCustomAttributes(typeof(HarmonyPatch), false).Length > 0)
-            .SelectMany(type => type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
-            .Where(method => method.IsDefined(typeof(HarmonyPrefix), false)
-                || method.IsDefined(typeof(HarmonyPostfix), false)
-                || method.IsDefined(typeof(HarmonyFinalizer), false));
+        _storageRadius = Config.Bind(
+            "Storage",
+            "Storage radius",
+            StorageRange.DefaultRadius,
+            new ConfigDescription(
+                StorageRadiusDescription,
+                new AcceptableValueRange<float>(StorageRange.MinimumRadius, StorageRange.MaximumRadius)));
 
-        foreach (var patchMethod in patchMethods)
+        try
         {
-            bool registered = _harmony.GetPatchedMethods().Any(target =>
-            {
-                var info = Harmony.GetPatchInfo(target);
+            _recipeStorage = RecipeStorage.Register(
+                false,
+                coroutine => StartCoroutine(coroutine),
+                StopAllCoroutines,
+                message => Log.LogWarning(message),
+                message => Log.LogError(message),
+                () => true,
+                () => StorageRadius);
+        }
+        catch (System.Exception exception)
+        {
+            Log.LogError($"{PluginName}: shared recipe-storage initialization failed. {exception}");
 
-                return info.Prefixes.Concat(info.Postfixes).Concat(info.Finalizers)
-                    .Any(patch => patch.owner == PluginGuid && patch.PatchMethod == patchMethod);
-            });
-
-            if (!registered)
-            {
-                _harmony.UnpatchSelf();
-                Log.LogError($"{PluginName}: {patchMethod.DeclaringType.Name}.{patchMethod.Name} was not registered; storage crafting is disabled.");
-
-                return;
-            }
+            throw;
         }
 
-        NearbyStorage.Initialize();
-        Log.LogInfo($"{PluginName} {PluginVersion} loaded; station crafting patches verified (20m storage radius).");
+        Log.LogInfo($"{PluginName} {PluginVersion} loaded; non-food station crafting patches verified ({StorageRadius:0.#}m storage radius).");
     }
 
     private void OnDestroy()
     {
+        _recipeStorage?.Dispose();
         StopAllCoroutines();
-        StorageCrafting.Clear();
-        _harmony?.UnpatchSelf();
-        NearbyStorage.Clear();
 
         if (ReferenceEquals(Instance, this))
         {

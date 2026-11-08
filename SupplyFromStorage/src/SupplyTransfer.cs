@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ValheimMods.Common;
 
 namespace SupplyFromStorage;
 
@@ -45,42 +46,37 @@ internal static class SupplyTransfer
                 : TransferResult.NotReady);
     }
 
-    internal static void CookingStationFuelRequested(
+    internal static bool TryHandleCookingStationFuel(
         CookingStation station,
         Humanoid user,
-        ItemDrop.ItemData item,
-        bool vanillaHandled)
+        ItemDrop.ItemData item)
     {
-        if (vanillaHandled || item != null || !SupplyFromStoragePlugin.FuelAutomationEnabled
-            || user != Player.m_localPlayer || user is not Player player
-            || !ReadyToCheck(_fuelChecks, station))
+        if (user is not Player player || !CanUse(station, player)
+            || !station.m_useFuel || station.GetFuel() > station.m_maxFuel - 1)
         {
-            return;
+            return false;
         }
 
-        Defer(_fuelChecks, station,
-            CanUse(station, player)
-                ? TransferCookingStationFuel(station, player, NearbyStorage.Find(player))
-                : TransferResult.NotReady);
+        string fuelName = station.m_fuelItem?.m_itemData?.m_shared?.m_name;
+
+        return TryHandleFuelRequest(station, user, item, fuelName,
+            localPlayer => TransferCookingStationFuel(station, localPlayer, NearbyStorage.Find(localPlayer)));
     }
 
-    internal static void SmelterFuelRequested(
+    internal static bool TryHandleSmelterFuel(
         Smelter smelter,
         Humanoid user,
-        ItemDrop.ItemData item,
-        bool vanillaHandled)
+        ItemDrop.ItemData item)
     {
-        if (vanillaHandled || item != null || !SupplyFromStoragePlugin.FuelAutomationEnabled
-            || user != Player.m_localPlayer || user is not Player player
-            || !ReadyToCheck(_fuelChecks, smelter))
+        if (user is not Player player || !CanUse(smelter, player) || smelter.GetFuel() > smelter.m_maxFuel - 1)
         {
-            return;
+            return false;
         }
 
-        Defer(_fuelChecks, smelter,
-            CanUse(smelter, player)
-                ? TransferSmelterFuel(smelter, player, NearbyStorage.Find(player))
-                : TransferResult.NotReady);
+        string fuelName = smelter.m_fuelItem?.m_itemData?.m_shared?.m_name;
+
+        return TryHandleFuelRequest(smelter, user, item, fuelName,
+            localPlayer => TransferSmelterFuel(smelter, localPlayer, NearbyStorage.Find(localPlayer)));
     }
 
     internal static bool TryHandleSmelterInput(
@@ -285,6 +281,35 @@ internal static class SupplyTransfer
         }
 
         return TransferResult.NoItems;
+    }
+
+    private static bool TryHandleFuelRequest(
+        object station,
+        Humanoid user,
+        ItemDrop.ItemData item,
+        string fuelName,
+        Func<Player, TransferResult> transfer)
+    {
+        if (item != null || !SupplyFromStoragePlugin.FuelAutomationEnabled
+            || user != Player.m_localPlayer || user is not Player player
+            || string.IsNullOrEmpty(fuelName) || player.GetInventory() == null
+            || player.GetInventory().HaveItem(fuelName, true)
+            || !CanUse(station, player) || !ReadyToCheck(_fuelChecks, station))
+        {
+            return false;
+        }
+
+        var result = transfer(player);
+        Defer(_fuelChecks, station, result);
+
+        if (result != TransferResult.Transferred)
+        {
+            return false;
+        }
+
+        player.Message(MessageHud.MessageType.Center, "$msg_added " + fuelName, 0, null, false);
+
+        return true;
     }
 
     private static TransferResult TransferFuel(
@@ -569,7 +594,7 @@ internal static class SupplyTransfer
 
     private static bool InRange(Vector3 position, Player player)
     {
-        return player != null && (position - player.transform.position).sqrMagnitude <= NearbyStorage.Radius * NearbyStorage.Radius;
+        return player != null && (position - player.transform.position).sqrMagnitude <= StorageRange.StationReach * StorageRange.StationReach;
     }
 
     private static bool HasFuelSpace(float fuel, float maximum)

@@ -12,8 +12,8 @@ public sealed class AutoRepairPlugin : BaseUnityPlugin
     public const string PluginName = "AutoRepair";
     public const string PluginAuthor = "Hoose";
 
-    // Keep the installed plugin identity stable when author branding changes.
-    public const string PluginGuid = "dhamhuis.valheim.autorepair";
+    // Changing this GUID renames the config file and breaks dependents; keep it stable after release.
+    public const string PluginGuid = "hoose.valheim.autorepair";
     public const string PluginVersion = "1.0.0";
 
     private Harmony _harmony;

@@ -2,7 +2,7 @@
 
 ## 1.0.0
 
-- Add focused station crafting and equipment upgrades from accessible storage within a fixed 20m player-centered sphere.
+- Add focused station crafting and equipment upgrades from accessible storage within a configurable player-centered sphere (1-100m, default 20m).
 - Keep inventory-first consumption, nearest storage ordering, normal access rules and vanilla station/recipe checks.
 - Include storage in crafting requirement checks and coloring.
 - Add exact ingredient planning, vanilla chest ownership requests, cancellation/timeout handling and signature/behavior validation.

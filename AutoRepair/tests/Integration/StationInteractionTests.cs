@@ -8,7 +8,7 @@ internal static class StationInteractionTests
 {
     internal static void Run(TestRunner runner)
     {
-        var harmony = new Harmony("Hoose.valheim.autorepair.tests");
+        var harmony = new Harmony("hoose.valheim.autorepair.tests");
 
         try
         {

@@ -19,6 +19,8 @@ $properties = $project.Project.PropertyGroup | Where-Object { $_.AssemblyName -o
 $assemblyName = [string]$properties.AssemblyName
 $targetFramework = [string]$properties.TargetFramework
 if (-not $assemblyName -or -not $targetFramework) { throw "Project must define AssemblyName and TargetFramework: $($projects[0].FullName)" }
+$usesCommonLibrary = @($project.Project.ItemGroup.ProjectReference |
+    Where-Object { $_.Include -like '*ValheimMods.Common.csproj' }).Count -gt 0
 
 $buildArgs = @('build', $projects[0].FullName, '--configuration', 'Release', '--verbosity', 'minimal')
 if ($ValheimInstallDir) { $buildArgs += "-p:ValheimInstallDir=$ValheimInstallDir" }
@@ -34,6 +36,12 @@ if (-not (Test-Path -LiteralPath $buildDll)) { throw "Build output not found: $b
 $distDirectory = Join-Path $modRoot 'dist'
 New-Item -ItemType Directory -Path $distDirectory -Force | Out-Null
 Copy-Item -LiteralPath $buildDll -Destination (Join-Path $distDirectory "$assemblyName.dll") -Force
+
+$commonDll = Join-Path $sourceDirectory "bin\Release\$targetFramework\ValheimMods.Common.dll"
+if ($usesCommonLibrary) {
+    if (-not (Test-Path -LiteralPath $commonDll)) { throw "Shared runtime library output not found: $commonDll" }
+    Copy-Item -LiteralPath $commonDll -Destination (Join-Path $distDirectory 'ValheimMods.Common.dll') -Force
+}
 
 if ($Deploy) {
     if (-not $R2ModmanProfileDir) {
@@ -51,5 +59,8 @@ if ($Deploy) {
     $pluginDirectory = Join-Path $R2ModmanProfileDir "BepInEx\plugins\$assemblyName"
     New-Item -ItemType Directory -Path $pluginDirectory -Force | Out-Null
     Copy-Item -LiteralPath $buildDll -Destination (Join-Path $pluginDirectory "$assemblyName.dll") -Force
+    if ($usesCommonLibrary) {
+        Copy-Item -LiteralPath $commonDll -Destination (Join-Path $pluginDirectory 'ValheimMods.Common.dll') -Force
+    }
     Write-Output "Deployed $assemblyName to $pluginDirectory"
 }

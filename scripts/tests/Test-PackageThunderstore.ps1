@@ -37,6 +37,10 @@ param([string]$ModDirectory)
 $dist = Join-Path $ModDirectory 'dist'
 New-Item -ItemType Directory -Path $dist -Force | Out-Null
 [System.IO.File]::WriteAllText((Join-Path $dist 'TestMod.dll'), 'test plugin payload')
+$commonSource = Join-Path (Join-Path $ModDirectory 'src') 'ValheimMods.Common.dll'
+if (Test-Path -LiteralPath $commonSource) {
+    Copy-Item -LiteralPath $commonSource -Destination (Join-Path $dist 'ValheimMods.Common.dll') -Force
+}
 '@ | Set-Content -LiteralPath (Join-Path $scripts 'Build-Mod.ps1')
     '<Project><PropertyGroup><AssemblyName>TestMod</AssemblyName><Version>1.0.0</Version></PropertyGroup></Project>' |
         Set-Content -LiteralPath (Join-Path $mod 'src\TestMod.csproj')
@@ -60,12 +64,24 @@ New-Item -ItemType Directory -Path $dist -Force | Out-Null
     }
 
     'updated package readme' | Set-Content -LiteralPath (Join-Path $mod 'Thunderstore\README.md')
+    '<Project><PropertyGroup><AssemblyName>TestMod</AssemblyName><Version>1.0.0</Version></PropertyGroup><ItemGroup><ProjectReference Include="ValheimMods.Common.csproj" /></ItemGroup></Project>' |
+        Set-Content -LiteralPath (Join-Path $mod 'src\TestMod.csproj')
+    [System.IO.File]::WriteAllText((Join-Path $mod 'src\ValheimMods.Common.dll'), 'shared runtime library')
     Invoke-Package
     $hash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash
     $archive = [System.IO.Compression.ZipFile]::OpenRead($archivePath)
     $reader = [System.IO.StreamReader]::new($archive.GetEntry('README.md').Open())
     try {
         Assert-Condition ($reader.ReadToEnd().Trim() -eq 'updated package readme') 'replaces existing archive with new contents'
+        $library = $archive.GetEntry('plugins/ValheimMods.Common.dll')
+        Assert-Condition ($library -and $library.Length -gt 0) 'includes the shared runtime library when present'
+        $libraryReader = [System.IO.StreamReader]::new($library.Open())
+        try {
+            Assert-Condition ($libraryReader.ReadToEnd() -eq 'shared runtime library') 'packages the exact shared-library build output'
+        }
+        finally {
+            $libraryReader.Dispose()
+        }
     }
     finally {
         $reader.Dispose()

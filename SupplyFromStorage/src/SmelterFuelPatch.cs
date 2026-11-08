@@ -5,9 +5,16 @@ namespace SupplyFromStorage;
 [HarmonyPatch(typeof(Smelter), "OnAddFuel")]
 internal static class SmelterFuelPatch
 {
-    [HarmonyPostfix]
-    private static void AfterFuelRequested(Smelter __instance, Humanoid user, ItemDrop.ItemData item, bool __result)
+    [HarmonyPrefix]
+    private static bool BeforeFuelRequested(Smelter __instance, Humanoid user, ItemDrop.ItemData item, ref bool __result)
     {
-        SupplyTransfer.SmelterFuelRequested(__instance, user, item, __result);
+        if (!SupplyTransfer.TryHandleSmelterFuel(__instance, user, item))
+        {
+            return true;
+        }
+
+        __result = true;
+
+        return false;
     }
 }
