@@ -1,6 +1,6 @@
 ---
 name: valheim-mod-build
-description: "Use when building, debugging, validating, or deploying this repository's Valheim BepInEx plugins, including AutoRepair and CraftFromStorage. Covers Unity Mono, game references, profile deployment, and build validation."
+description: "Use when building, debugging, validating, or deploying this repository's Valheim BepInEx plugins, such as AutoRepair, CraftFromStorage, CookFromStorage and SupplyFromStorage, and the shared ValheimMods.Common library. Covers Unity Mono, game references, profile deployment, and build validation."
 ---
 
 # Valheim Mod Build
