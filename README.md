@@ -36,4 +36,4 @@ The [mod API reference](docs/reference/README.md) maps supporting libraries and 
 
 ## Artwork
 
-The [carved-wood frame](assets/icons/valheim-wood-frame.svg) is shared across mod icons. Each mod owns its composition, such as [AutoRepair's icon source](AutoRepair/assets/icon.svg), and its 256x256 package PNG.
+The [background panel](assets/icons/valheim-panel.svg) and [carved-wood frame](assets/icons/valheim-wood-frame.svg) are shared across mod icons: the panel is the first layer and the frame the last. Each mod owns its composition, such as [AutoRepair's icon source](AutoRepair/assets/icon.svg), and its 256x256 package PNG.
