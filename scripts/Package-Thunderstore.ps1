@@ -35,6 +35,8 @@ foreach ($requiredFile in @('README.md', 'icon.png')) {
     }
 }
 if (-not (Test-Path -LiteralPath (Join-Path $modRoot 'CHANGELOG.md'))) { throw 'CHANGELOG.md not found.' }
+$licensePath = Join-Path (Split-Path -Parent $modRoot) 'LICENSE'
+if (-not (Test-Path -LiteralPath $licensePath)) { throw "Repository license not found: $licensePath" }
 
 $buildScript = Join-Path $PSScriptRoot 'Build-Mod.ps1'
 $buildArguments = @{ ModDirectory = $modRoot }
@@ -56,6 +58,7 @@ $files = [ordered]@{
     'README.md' = (Join-Path $packageDirectory 'README.md')
     'icon.png' = (Join-Path $packageDirectory 'icon.png')
     'CHANGELOG.md' = (Join-Path $modRoot 'CHANGELOG.md')
+    'LICENSE' = $licensePath
     "plugins/$assemblyName.dll" = $pluginDll
 }
 $commonDll = Join-Path $distDirectory 'ValheimMods.Common.dll'

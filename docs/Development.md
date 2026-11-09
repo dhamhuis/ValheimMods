@@ -78,6 +78,7 @@ The ZIP contains only player-facing metadata, the plugin and any required shared
 - `README.md` from the mod's `Thunderstore/` folder
 - `icon.png` from the mod's `Thunderstore/` folder (256x256)
 - `CHANGELOG.md` from the mod root
+- `LICENSE` from the repository root
 - `plugins/<ModName>.dll`
 - `plugins/ValheimMods.Common.dll` when referenced
 

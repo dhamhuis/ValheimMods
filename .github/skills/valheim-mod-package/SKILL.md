@@ -12,9 +12,9 @@ Applies to every mod folder with a `<Mod>/Thunderstore` directory, such as AutoR
 1. Keep the package `manifest.json`, `README.md` and `icon.png` under `<Mod>/Thunderstore`; keep `CHANGELOG.md` at the mod root.
 2. Keep three versions aligned: `version_number` in `manifest.json`, `<Version>` in `<Mod>/src/<Mod>.csproj` and the `PluginVersion` constant in `<Mod>/src/<Mod>Plugin.cs`. The per-mod `pack.ps1` checks `PluginVersion`; the shared packager checks the project version.
 3. Package only after changes are satisfactory and tested. Run `.\<Mod>\scripts\pack.ps1` (pass `-R2ModmanProfileDir` when the profile is not the default). It calls the shared [Package-Thunderstore](../../../scripts/Package-Thunderstore.ps1), which builds the mod and creates `<Mod>/dist/<name>-<version>.zip`.
-4. Inspect the archive. Its root must contain `manifest.json`, `README.md`, `icon.png` and `CHANGELOG.md`. `plugins/` contains `<Mod>.dll` and, when the project references `ValheimMods.Common`, `ValheimMods.Common.dll`. All mods sharing the library should ship the same current build of it.
+4. Inspect the archive. Its root must contain `manifest.json`, `README.md`, `icon.png`, `CHANGELOG.md` and the repository `LICENSE`. `plugins/` contains `<Mod>.dll` and, when the project references `ValheimMods.Common`, `ValheimMods.Common.dll`. All mods sharing the library should ship the same current build of it.
 5. Never include game assemblies, BepInEx/Harmony DLLs, NuGet packages, debug output or credentials in the archive.
-6. Keep the prepared `dist` DLLs and ZIPs in version control. Do not regenerate ZIPs for every edit.
+6. Keep the prepared `dist` DLLs and ZIPs in version control. Do not regenerate ZIPs for every edit; existing packages without `LICENSE` remain unchanged until the next planned version package.
 7. Publishing is separate from packaging. Do not upload without an explicit release request; keep account tokens out of files, logs and chat.
 
 ## GitHub Release Workflow

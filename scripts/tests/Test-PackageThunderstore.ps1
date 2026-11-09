@@ -30,6 +30,7 @@ function Invoke-Package([switch]$ExpectFailure) {
 
 try {
     New-Item -ItemType Directory -Path $scripts, (Join-Path $mod 'src'), (Join-Path $mod 'Thunderstore') | Out-Null
+    'test repository license' | Set-Content -LiteralPath (Join-Path $fixture 'LICENSE')
     Copy-Item -LiteralPath (Join-Path $repositoryScripts 'Package-Thunderstore.ps1') -Destination $scripts
     # Isolate archive handling from compilation and real distribution files.
     @'
@@ -56,8 +57,8 @@ if (Test-Path -LiteralPath $commonSource) {
     $archive = [System.IO.Compression.ZipFile]::OpenRead($archivePath)
     try {
         $names = @($archive.Entries.FullName | Sort-Object)
-        $expected = @('manifest.json', 'README.md', 'icon.png', 'CHANGELOG.md', 'plugins/TestMod.dll') | Sort-Object
-        Assert-Condition (-not (Compare-Object $expected $names)) 'archive contains exactly the five player-facing files'
+        $expected = @('manifest.json', 'README.md', 'icon.png', 'CHANGELOG.md', 'LICENSE', 'plugins/TestMod.dll') | Sort-Object
+        Assert-Condition (-not (Compare-Object $expected $names)) 'archive contains exactly the six player-facing files'
     }
     finally {
         $archive.Dispose()
