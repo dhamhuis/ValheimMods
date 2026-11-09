@@ -39,3 +39,7 @@ The [mod API reference](docs/reference/README.md) maps supporting libraries and 
 ## Artwork
 
 The [background panel](assets/icons/valheim-panel.svg) and [carved-wood frame](assets/icons/valheim-wood-frame.svg) are shared across mod icons: the panel is the first layer and the frame the last. Each mod owns its composition, such as [AutoRepair's icon source](AutoRepair/assets/icon.svg), and its 256x256 package PNG.
+
+## License
+
+Unless otherwise noted, original materials in this repository are licensed under the [MIT License](LICENSE). This does not grant rights to Valheim or other third-party names, trademarks, or materials.
