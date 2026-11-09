@@ -11,6 +11,7 @@ Read this index before library discovery. It is an agent routing map, not an exh
 | Recipes, `CountItems`, `RemoveItem`, `HaveRequirementItems`, `GetFirstRequiredItem`, `DoCrafting` | [Crafting and inventories](Crafting.md) | Existing scoped patches and ingredient plan; new recipe systems require discovery. |
 | Containers, access, wards, `ZNetView`, ownership RPCs, persistence | [Storage and ownership](Storage.md) | Existing selection/ownership protocol; multiplayer and persistence not live-verified here. |
 | Fuel and processing inputs, `Fireplace`, `CookingStation`, `Fermenter`, `Smelter`, `Windmill` | [Fuel and processing](Processing.md) | Installed component signatures, cooking/Fermenter input paths and SupplyFromStorage hooks; prefab mappings and machine behavior need in-game verification. |
+| World time, `EnvMan.instance`, `GetDayFraction`, `GetDay` | [World time display](WorldTime.md) | Public time and day APIs and implementation; live timing and HUD behavior need in-game verification. |
 | Missing API, changed signature, unfamiliar system, revalidation | [API discovery skill](../../.github/skills/valheim-api-discovery/SKILL.md) | Bounded inspection, evidence recording, validation, and maintenance procedure. |
 | Build, deploy, test, package | [Development guide](../Development.md) | Commands and validation limits; not an API catalog. |
 

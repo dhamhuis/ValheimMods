@@ -1,0 +1,7 @@
+{
+    "name": "WorldClock",
+    "description": "A configurable on-screen display of Valheim's in-game time.",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/dhamhuis/ValheimMods",
+    "dependencies": ["denikson-BepInExPack_Valheim-5.4.2360"]
+}

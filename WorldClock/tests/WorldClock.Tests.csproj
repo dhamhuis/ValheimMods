@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\src\ClockTimeFormatter.cs" Link="Production\ClockTimeFormatter.cs" />
+    <Compile Include="..\src\ClockDisplayCache.cs" Link="Production\ClockDisplayCache.cs" />
+    <Compile Include="..\src\TimeWidthCandidates.cs" Link="Production\TimeWidthCandidates.cs" />
+    <Compile Include="..\src\ClockTextFormatter.cs" Link="Production\ClockTextFormatter.cs" />
+    <Compile Include="..\src\ClockLayout.cs" Link="Production\ClockLayout.cs" />
+    <Compile Include="..\src\FontCatalog.cs" Link="Production\FontCatalog.cs" />
+    <ProjectReference Include="..\..\tests\ValheimMods.Testing\ValheimMods.Testing.csproj" />
+  </ItemGroup>
+</Project>

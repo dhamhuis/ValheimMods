@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>WorldClock</AssemblyName>
+    <RootNamespace>WorldClock</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <Version>1.0.0</Version>
+    <Authors>Hoose</Authors>
+    <Company>Hoose</Company>
+    <Product>Valheim WorldClock</Product>
+    <Description>Displays the current in-game time in a configurable screen position.</Description>
+    <Copyright>Copyright (c) Hoose 2026</Copyright>
+    <ValheimInstallDir Condition="'$(ValheimInstallDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimInstallDir>
+    <ValheimManagedDir Condition="'$(ValheimManagedDir)' == ''">$(ValheimInstallDir)\valheim_Data\Managed</ValheimManagedDir>
+    <R2ModmanProfileDir Condition="'$(R2ModmanProfileDir)' == ''">$(APPDATA)\r2modmanPlus-local\Valheim\profiles\Valheim Mod Building</R2ModmanProfileDir>
+    <BepInExCoreDir Condition="'$(BepInExCoreDir)' == ''">$(R2ModmanProfileDir)\BepInEx\core</BepInExCoreDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <Optimize>true</Optimize>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExCoreDir)\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ValheimManagedDir)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_valheim">
+      <HintPath>$(ValheimManagedDir)\assembly_valheim.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ValheimManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(ValheimManagedDir)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(ValheimManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="ValidateBuildReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(ValheimManagedDir)\assembly_valheim.dll')" Text="Valheim managed assemblies not found. Set ValheimInstallDir or ValheimManagedDir." />
+    <Error Condition="!Exists('$(ValheimManagedDir)\UnityEngine.dll')" Text="UnityEngine reference not found in the Valheim managed directory." />
+    <Error Condition="!Exists('$(ValheimManagedDir)\UnityEngine.IMGUIModule.dll')" Text="Unity IMGUI reference not found in the Valheim managed directory." />
+    <Error Condition="!Exists('$(ValheimManagedDir)\UnityEngine.TextRenderingModule.dll')" Text="Unity text-rendering reference not found in the Valheim managed directory." />
+    <Error Condition="!Exists('$(BepInExCoreDir)\BepInEx.dll')" Text="BepInEx core not found. Set R2ModmanProfileDir or BepInExCoreDir." />
+  </Target>
+</Project>

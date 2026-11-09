@@ -17,6 +17,7 @@ From the repository root:
 ```powershell
 dotnet build .\ValheimMods.sln --configuration Release
 .\AutoRepair\scripts\build.ps1
+.\WorldClock\scripts\build.ps1
 .\CraftFromStorage\scripts\build.ps1
 .\CookFromStorage\scripts\build.ps1
 .\SupplyFromStorage\scripts\build.ps1
@@ -38,6 +39,7 @@ The default paths are the standard Steam installation and the r2modman `Valheim 
 .\AutoRepair\scripts\build.ps1 -Deploy -R2ModmanProfileDir 'C:\path\to\profile'
 .\CookFromStorage\scripts\build.ps1 -Deploy -R2ModmanProfileDir 'C:\path\to\profile'
 .\SupplyFromStorage\scripts\build.ps1 -Deploy -R2ModmanProfileDir 'C:\path\to\profile'
+.\WorldClock\scripts\build.ps1 -Deploy -R2ModmanProfileDir 'C:\path\to\profile'
 ```
 
 Deployment copies the plugin DLL and any required shared runtime library to the profile's `BepInEx/plugins/<ModName>` folder. Keep `ValheimMods.Common.dll` beside plugins that reference it. Remove or relocate any older copy first so only one copy of each plugin is installed. Never copy game assemblies, publicized references, Unity, Harmony, or BepInEx DLLs into the plugin folder.
@@ -57,6 +59,7 @@ Do not regenerate distribution ZIPs after every code, documentation or artwork e
 .\CraftFromStorage\scripts\pack.ps1
 .\CookFromStorage\scripts\pack.ps1
 .\SupplyFromStorage\scripts\pack.ps1
+.\WorldClock\scripts\pack.ps1
 ```
 
 Each package wrapper checks the plugin version against its manifest; the shared packager checks the project version against the manifest. The shared packager creates a temporary ZIP alongside the destination, then reopens it and verifies its exact entry count and each entry's SHA-256 against its source file. Only a complete, verified ZIP atomically replaces an existing archive. Read, validation or replacement failures preserve the previous ZIP and clean up the temporary archive. The build step still updates the standalone `dist/` DLL before archiving.
@@ -93,13 +96,25 @@ dotnet run --project .\CraftFromStorage\tests\CraftFromStorage.Tests.csproj --co
 
 Run `.\CraftFromStorage\scripts\pack.ps1` only after review and testing are complete, not on each iteration. Deployment targets `BepInEx/plugins/CraftFromStorage/`; the prepared package includes `ValheimMods.Common.dll` beside the plugin.
 
-Each mod has an independent production-linked test executable requiring .NET SDK 10 and a test-only HarmonyX package:
+## WorldClock
+
+```powershell
+.\WorldClock\scripts\build.ps1
+dotnet run --project .\WorldClock\tests\WorldClock.Tests.csproj --configuration Release
+.\WorldClock\scripts\build.ps1 -Deploy
+.\scripts\Render-ModIcon.ps1 -ModDirectory .\WorldClock
+```
+
+WorldClock is a client-side HUD display with no Harmony patches or shared runtime dependency. The formatter tests do not validate live HUD layering or time progression; check its startup and screen behavior in the selected Valheim profile. Run `.\WorldClock\scripts\pack.ps1` only after review and testing are complete.
+
+The four game-integration test executables require .NET SDK 10 and a test-only HarmonyX package. WorldClock has a separate .NET 10 formatter test executable with no Harmony dependency.
 
 ```powershell
 dotnet run --project .\AutoRepair\tests\AutoRepair.Tests.csproj --configuration Release
 dotnet run --project .\CraftFromStorage\tests\CraftFromStorage.Tests.csproj --configuration Release
 dotnet run --project .\CookFromStorage\tests\CookFromStorage.Tests.csproj --configuration Release
 dotnet run --project .\SupplyFromStorage\tests\SupplyFromStorage.Tests.csproj --configuration Release
+dotnet run --project .\WorldClock\tests\WorldClock.Tests.csproj --configuration Release
 ```
 
 Each storage-mod test project links its production code and the shared container helper source, without referencing a built game or common-library assembly. CraftFromStorage and CookFromStorage also link the shared recipe engine; it installs one verified patch set and registers independent food/non-food clients. CookFromStorage's recipe integration suite tests both categories alone, both together, and unloading one client. The signature validator includes the prepared common DLL for plugins using this engine. AutoRepair's test project only links its repair patch. Mod-specific plugin doubles live in `TestDoubles/`, Harmony integration checks in `Integration/`, and CraftFromStorage's standalone behavioral checks in `Behavior/`. The mods' tests do not depend on one another.
@@ -108,9 +123,9 @@ Test entry points only run suites and print totals. Each suite registers descrip
 
 The runner reports each test's class/method name, identifies that method when an assertion fails, and prints separate test and assertion totals. To add coverage, write a documented scenario method and register it with `runner.Run(...)` in the relevant suite.
 
-All four mod test projects reference [ValheimMods.Testing](../tests/ValheimMods.Testing/), a neutral test-support library organized into `GameStubs/`, `UnityStubs/` and `Logging/`. It contains no mod-specific types or production references. Its API doubles retain game/Unity names and namespaces so production patches can target them unchanged.
+All five mod test projects reference [ValheimMods.Testing](../tests/ValheimMods.Testing/), a neutral test-support library organized into `GameStubs/`, `UnityStubs/` and `Logging/`. It contains no mod-specific types or production references. Its API doubles retain game/Unity names and namespaces so production patches can target them unchanged.
 
-The tests apply HarmonyX patches to game stubs, not a live Unity instance. The profile's older Harmony remains the production reference, while a .NET-compatible HarmonyX version runs each test executable. The signature validator uses the profile's Mono.Cecil DLL to check Harmony bindings against the installed game. Neither replaces the [in-game test checklist](../CraftFromStorage/README.md#in-game-review-checklist), especially multiplayer ownership and inventory persistence. Keep other craft-from-storage plugins disabled during CraftFromStorage tests.
+The game-integration tests apply HarmonyX patches to game stubs, not a live Unity instance; WorldClock's suite tests only its pure time formatter. The profile's older Harmony remains the production reference, while a .NET-compatible HarmonyX version runs the integration test executables. The signature validator uses the profile's Mono.Cecil DLL to check Harmony bindings against the installed game. Neither replaces the [in-game test checklist](../CraftFromStorage/README.md#in-game-review-checklist), especially multiplayer ownership and inventory persistence. Keep other craft-from-storage plugins disabled during CraftFromStorage tests.
 
 The shared icon renderer uses an isolated headless Microsoft Edge profile to rasterize the original SVG with the shared frame, then writes a 256x256 PNG. It does not launch Valheim.
 

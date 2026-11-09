@@ -1,0 +1,45 @@
+# World time display
+
+Status: Verified - installed assembly metadata and method-body inspection; formatter automated tests.
+Last verified: 2026-11-08.
+Evidence: [WorldClock implementation](../../WorldClock/src/WorldClockPlugin.cs) calls `EnvMan.GetDayFraction()` and `EnvMan.GetDay()` and draws with Unity IMGUI; [formatter tests](../../WorldClock/tests/ClockTimeFormatterTests.cs) cover time and phase behavior, and [template tests](../../WorldClock/tests/ClockTextFormatterTests.cs) cover placeholder and font-tag conversion. `scripts/Get-ValheimApi.ps1` inspected the installed `assembly_valheim.dll`; Mono.Cecil method-body inspection confirmed the behavior described below. [Unity's rich text documentation](https://docs.unity3d.com/2022.3/Documentation/Manual/StyledText.html) describes `GUIStyle.richText`, `<b>`, `<size>` and `<color>` tags. The same inspector confirmed `Resources.FindObjectsOfTypeAll<T>()`, `GUIStyle.font`, `CalcSize(GUIContent)` and `wordWrap` on the local Unity assemblies.
+Assembly: `assembly_valheim.dll`, MVID `7ac23c58-e834-4776-b9c1-ae8a703440f1`, SHA-256 `9F959C0396EC4240D47FCBE5D0D062C428CC627244506DB5EA567F9D77B2B769`.
+Limitations: Assembly inspection did not execute game code. Automated tests cover our pure formatter only; on-screen layout, BepInEx config behavior, and live Valheim time progression still need in-game verification. The color observation below is limited to one user-provided screenshot and test setup.
+Unity metadata fingerprints: `UnityEngine.CoreModule.dll` SHA-256 `FBA3821AFB6867FE4D471DC50BF04BA21E6982B33AB6B5336B08A5C55119D990`; `UnityEngine.IMGUIModule.dll` SHA-256 `6D79759136956F7E01F07E850905F9A8869CFD6987672CB85310AF35E510E109`; `UnityEngine.TextRenderingModule.dll` SHA-256 `7021F3013CABDC67A8F5A2B27E1D98C00F0102C6C45CC26D05312EC1797D7C84`.
+
+## Use when
+
+Building a local HUD clock or reading the current world-day fraction. Prefer the public `EnvMan.GetDayFraction()` API; do not reflect over the private backing field.
+
+## API and behavior
+
+- `EnvMan.instance` has a public static getter returning the current `EnvMan`.
+- `float EnvMan.GetDayFraction()` is public and takes no parameters.
+- Installed method-body inspection found `ldarg.0; ldfld EnvMan::m_smoothDayFraction; ret`, so the method returns that instance's private smooth-day-fraction field. This establishes implementation, not live timing or the range of values during gameplay.
+- `int EnvMan.GetDay()` is public and parameterless; its inspected body obtains `ZNet.instance.GetTimeSeconds()` and passes that value to the public `int EnvMan.GetDay(double time)` overload, which divides by `m_dayLengthSec` and converts to `int`. WorldClock only calls it when `ZNet.instance` exists and the display template includes a day placeholder.
+- `int EnvMan.GetCurrentDay()` is private; its inspected body divides `m_totalSeconds` by `m_dayLengthSec` and converts to `int`. The inspected `EnvMan.OnMorning` passes that value to the localized `$msg_newday` message. The relationship between `m_totalSeconds` and network time during all live lifecycle and time-skip states has not been verified.
+- WorldClock reads the fraction during `Update()` only while the local player and HUD exist, then draws a local label with Unity IMGUI. It does not patch game methods or require a server install.
+- WorldClock caches the day-placeholder check when the template changes, formats time again when the in-game second or configuration changes, and reuses formatted runs when the resulting time, phase, day, template and color space are unchanged. Its render measurements and styles are reused until the runs or loaded-font catalog change; the demo layout is cached until its sample, width or font catalog changes. [Cache tests](../../WorldClock/tests/ClockDisplayCacheTests.cs) exercise reuse, config changes and error recovery, not Unity rendering or measured performance.
+- For each visible time placeholder, WorldClock measures distinct formatted seconds across one day with the run's font and surrounding rich-text style and caches the maximum width. Its layout advances two pixels less than that width without changing the text's drawing rectangle, which can overlap adjacent text. [Width tests](../../WorldClock/tests/TimeWidthCandidatesTests.cs) use synthetic metrics and cover complete days for several formats; they do not establish Unity font metrics, actual in-game alignment or measurement cost. A format with seconds can require up to 86,400 distinct measurements per font/style.
+- WorldClock translates its user-facing `<font size=... color=...>` tags into nested Unity `<size>` and `<color>` tags and enables `GUIStyle.richText`. Its shadow removes color tags while retaining the other styling. This is repository implementation and formatter-test evidence; live Unity rendering has not been verified.
+- For `<font name=...>`, WorldClock resolves an already-loaded Unity `Font` through `Resources.FindObjectsOfTypeAll<Font>()`, and draws separately measured runs using `GUIStyle.font`; the optional demo lists usable loaded fonts in a scroll view with one font per row and aligned name and sample columns. These are implementation decisions, not proof that any specific font is loaded in the game.
+- On the recorded `UnityEngine.IMGUIModule.dll`, `GUIStyle.fixedWidth`, `fixedHeight`, `wordWrap` and `padding` have public getters and setters; `CalcSize(GUIContent)` and `CalcHeight(GUIContent, float)` are public. WorldClock clears inherited fixed dimensions, disables clock word wrapping and measures the label without the previous 600-pixel cap. Metadata and layout tests do not establish native IMGUI rendering behavior.
+- `GUIStyle.lineHeight` has a public getter on that same assembly. The demo uses the larger of `lineHeight` and `CalcHeight` for each column, centers both in a shared padded row and clips to that row. The layout arithmetic is tested; actual font metrics and clipping remain to be checked in game.
+- On 2026-11-08 the user reported the updated sampler looked great in game. That observation predates the caching change and does not establish behavior after it.
+- `UnityEngine.GUI.color` and `GUI.contentColor` have public static getters and setters in that same assembly. [Unity's GUI.color documentation](https://docs.unity3d.com/2022.3/Documentation/ScriptReference/GUI-color.html) describes a global multiplier affecting text; [GUI.contentColor](https://docs.unity3d.com/2022.3/Documentation/ScriptReference/GUI-contentColor.html) is a text tint. WorldClock temporarily sets both to white around overlay drawing and restores them in `finally`. On 2026-11-08 the user reported that the previously observed color mismatch persisted after deploying this change.
+- On the recorded `UnityEngine.CoreModule.dll`, `QualitySettings.activeColorSpace` has a public static getter returning `ColorSpace`. WorldClock pre-encodes RGB channels in hexadecimal rich-text color tags when it reports linear space; it preserves alpha and leaves gamma-space colors unchanged. Formatter tests check this transformation, not live Unity behavior.
+
+## Pitfalls
+
+- Do not use the wall-clock time; the displayed time must follow the world-day fraction.
+- Avoid depending on the private backing field or private day-count method when public time APIs suffice. The parameterless `GetDay()` calls into `ZNet.instance`, so callers must account for its availability.
+- An API signature and body inspection do not establish HUD visibility behavior or live-game timing; verify those in game.
+
+## Unknowns
+
+- Live behavior when the HUD is hidden, paused, or a world is loading has not been tested.
+- The game-defined numeric range and boundary behavior of the fraction have not been independently observed in game.
+- Verify that the displayed `GetDay()` value matches the game's day announcement across world loading, morning and time skipping in live play.
+- Verify loaded font names, bold/size rendering across mixed-font runs, sampler wrapping, scrolling and readability in a live game. The game default and availability of the suggested names have not been established.
+- A name absent from `Resources.FindObjectsOfTypeAll<Font>()` is only absent from that current loaded-resource lookup, not necessarily absent from game assets or from other text systems. Why individual suggested names are unavailable has not been investigated.
+- In a user-provided 2026-11-08 screenshot before compensation, configured `#FFA500`, `#808080`, and `#FFFFFF` text had frequent solid pixels `#FF5F00`, `#373737`, and `#FFFFFF`, respectively. These closely match sRGB-to-linear conversion (predicted `#FF6000`, `#373737`, and `#FFFFFF`). In a follow-up screenshot using the same sample after deployment, frequent solid pixels were `#FFA400`, `#808080`, and `#FFFFFF`, respectively. This supports the correction for that setup, within one green-channel value for orange; neither screenshot identifies the exact rendering stage or establishes behavior for all colors, alpha values, or color spaces.
