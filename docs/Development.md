@@ -83,6 +83,31 @@ The ZIP contains only player-facing metadata, the plugin and any required shared
 
 The repository overview, mod developer README, and this guide are not packaged. Inspect the ZIP before release. Packaging does not upload to Thunderstore; publishing is a separate action. Keep account credentials out of the repository and use a new version number for each published release.
 
+### GitHub Releases
+
+Use one companion GitHub release per mod, with tag `<Mod>-v<version>` and title `<Mod> <version>`. Thunderstore remains the primary installation channel for r2modman users. Attach the existing prepared ZIP from `<Mod>/dist/`, not files from `<Mod>/Thunderstore/`; do not rebuild just to create a GitHub release.
+
+Before publishing, validate the archive and identify the committed source snapshot associated with its build. Compare the local ZIP's Git blob ID (`git hash-object`) with its blob at that commit (`git rev-parse '<commit>:AutoRepair/dist/AutoRepair-1.0.0.zip'`). Check the corresponding plugin and shared-library source and packaged metadata as well; matching ZIP bytes alone does not prove build provenance. Resolve uncertainty rather than tagging an arbitrary current branch tip.
+
+Check existing tags, releases and drafts to avoid duplicates. Do not move tags or replace published assets without approval. Prefer authenticated GitHub CLI/API tools, with a signed-in shared browser as a fallback. The following PowerShell example assumes GitHub CLI is installed and authenticated, a new release is explicitly requested, and `$releaseCommit` is set to the verified full commit hash:
+
+```powershell
+gh release list --repo dhamhuis/ValheimMods
+gh release create AutoRepair-v1.0.0 .\AutoRepair\dist\AutoRepair-1.0.0.zip --repo dhamhuis/ValheimMods --target $releaseCommit --title 'AutoRepair 1.0.0' --notes $releaseNotes
+```
+
+Set `$releaseNotes` to a player-facing feature/change summary, a Thunderstore package link, and manager/manual installation instructions including any required shared DLL. Report only supported testing and compatibility claims. Use `--prerelease` when a preview is requested. If an upload is interrupted, inspect and continue the matching draft instead of creating another release.
+
+After publication, confirm the release is not a draft, the remote tag points to the intended commit, and the attached ZIP name and SHA-256 match the local source. Compare `Get-FileHash -Algorithm SHA256` with GitHub's displayed asset digest, or download the asset and hash it. Report any unresolved mismatch explicitly. Keep credentials and temporary browser state out of repository files. GitHub Releases do not publish to Thunderstore, replace tracked `dist/` files, or require GitHub Packages. The [packaging skill](../.github/skills/valheim-mod-package/SKILL.md) maintains the agent release checklist.
+
+### Published package missing from a mod manager
+
+A working Thunderstore package page does not guarantee that the mod-manager feed already includes the release. Compare the [individual package API](https://thunderstore.io/api/experimental/package/Hoose/SupplyFromStorage/) (substitute the package name) with the [Valheim package feed](https://thunderstore.io/c/valheim/api/v1/package/). Check the individual package's `latest.version_number`, `latest.is_active` and `community_listings` for Valheim, then check whether the feed contains that package and version. The legacy `valheim.thunderstore.io/api/v1/package/` URL redirects to this feed.
+
+If the individual package exists and is active but the feed omits it, inspect the feed response's `Last-Modified`, `x-cache-status` and `Age` headers. A stale feed predating the upload explains both missing search results and an app-install link reporting "Mod does not exist"; restarting the manager cannot refresh Thunderstore's server-side feed. Wait for the feed to update, then refresh or restart the manager. If the discrepancy persists, contact Thunderstore support with the package URL and feed evidence. Do not rebuild, bump the version or re-upload solely to work around a stale feed. An `unreviewed` listing alone does not establish rejection or explain the discrepancy.
+
+For an immediate workaround, use the package page's manual download and follow its manual installation instructions in the selected profile. Install BepInExPack through the manager first, keep required shared DLLs beside the plugin, and remove the manual copy before installing the same mod through the manager to avoid duplicate plugins.
+
 ## CraftFromStorage
 
 CraftFromStorage follows the shared wrappers and package layout:
