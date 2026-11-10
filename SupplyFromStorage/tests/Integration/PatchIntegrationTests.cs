@@ -20,6 +20,7 @@ internal static class PatchIntegrationTests
             runner.Run(FullFireplaceFeedbackUsesAccessibleStorage);
             runner.Run(SwitchCallbacksSupplyOneItemPerUse);
             runner.Run(SmelterMessagesReflectAvailableInputs);
+            runner.Run(KilnSelectionSuppressesVanillaAndConsumesExactlyOnce);
             runner.Run(CookingStationFuelSwitchSuppliesOnlyFuel);
             runner.Run(FrostKilnFuelMessagesReflectStorage);
             runner.Run(FrostFoundryFuelMessagesReflectStorage);
@@ -33,6 +34,36 @@ internal static class PatchIntegrationTests
             Reset();
             harmony.UnpatchSelf();
         }
+    }
+
+    private static void KilnSelectionSuppressesVanillaAndConsumesExactlyOnce(Action<bool, string> check)
+    {
+        var player = Reset();
+        var station = new Smelter { m_name = "$piece_charcoalkiln" };
+        station.m_conversion.Add(new Smelter.ItemConversion { m_from = StationDrop("Wood", "$item_wood") });
+        station.m_conversion.Add(new Smelter.ItemConversion { m_from = StationDrop("FineWood", "$item_finewood") });
+        var fine = Item("$item_finewood", 3);
+        fine.m_dropPrefab = new GameObject("FineWood");
+        player.Inventory.Items.Add(fine);
+        var wood = Item("$item_wood", 2);
+        wood.m_dropPrefab = new GameObject("Wood");
+        Chest(1, 0, 0, wood);
+        SupplyFromStoragePlugin.InputSelectionEnabled = true;
+        KilnInputSelection.Preferences = ValheimMods.Common.InputSelection.InputPreferences.Parse("Wood,FineWood|FineWood");
+        KilnInputSelection.Session.Observe(station, true, true, false);
+        check(station.OnAddOre(null, player, null), "Patched kiln did not accept preferred storage input.");
+        check(station.QueueSize == 1 && wood.m_stack == 1 && fine.m_stack == 3,
+            "Patched kiln also ran vanilla or consumed an excluded inventory type.");
+        station.OnAddOre(null, player, null);
+        check(station.QueueSize == 2 && fine.m_stack == 3, "Second native callback did not supply exactly one matching type.");
+        check(!station.OnAddOre(null, player, null) && fine.m_stack == 3 && station.QueueSize == 2,
+            "Exhaustion fell through to vanilla's excluded inventory item.");
+        KilnInputSelection.Session.Observe(station, false, false, false);
+        KilnInputSelection.Session.Select("FineWood");
+        check(station.QueueSize == 2 && fine.m_stack == 3, "Choosing a type consumed an item.");
+        KilnInputSelection.Session.Observe(station, true, true, false);
+        check(station.OnAddOre(null, player, null) && station.QueueSize == 3 && fine.m_stack == 2,
+            "Explicit selection did not override exclusion exactly once through the real prefix.");
     }
 
     /// <summary>Fireplace E actions supply at most one item and preserve vanilla inventory/toggle behavior.</summary>

@@ -169,6 +169,10 @@ CookFromStorage intercepts `CookingStation.OnInteract`, reached from direct inte
 
 Run `.\CookFromStorage\scripts\pack.ps1` after testing and review. The package includes `ValheimMods.Common.dll`, which must be installed beside CookFromStorage.
 
+The optional SupplyFromStorage input picker uses additional shared input patches documented in [Input selection and picker UI](reference/InputSelection.md). The signature validator now inspects the common library for any plugin that references it, not just recipe-engine clients. It validates binding signatures, not runtime registration or input ordering. Keep identical common-library DLLs beside all installed storage mods during testing; do not install a second copy of a plugin alongside an existing mod-manager-managed folder.
+
+The consuming milestone is separately gated by `Input selection/Enabled` and automatic processing; enabling the older preview flag alone still cannot change E selection. It controls only the Charcoal Kiln, selecting an exact type across inventory/storage before source priority, applying local per-character priorities/exclusions and latching native held requests. The [Supply README](../SupplyFromStorage/README.md) contains controls, persistence format, disabled-mode semantics and the required live checklist. Tests cover policy round-trips, invalid-data blocking, inventory/storage precedence, exclusions/explicit override, exhaustion, interruptions and rollback/post-commit failures. Actual BepInEx configuration persistence and live input/networking still need user verification. Do not package this milestone before those checks.
+
 ## SupplyFromStorage preview
 
 ```powershell

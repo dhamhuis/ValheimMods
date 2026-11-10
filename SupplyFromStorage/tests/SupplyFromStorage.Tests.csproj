@@ -8,6 +8,11 @@
   <ItemGroup>
     <Compile Include="..\..\ValheimMods.Common\src\ContainerRegistry.cs" Link="Production\ContainerRegistry.cs" />
     <Compile Include="..\..\ValheimMods.Common\src\StorageRange.cs" Link="Production\StorageRange.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\InputSelection\InputPreviewSession.cs" Link="Production\InputPreviewSession.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\InputSelection\InputPreviewItem.cs" Link="Production\InputPreviewItem.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\InputSelection\InputPreferences.cs" Link="Production\InputPreferences.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\InputSelection\InputTypeSession.cs" Link="Production\InputTypeSession.cs" />
+    <Compile Include="..\src\KilnInputSelection.cs" Link="Production\KilnInputSelection.cs" />
     <Compile Include="..\src\NearbyStorage.cs" Link="Production\NearbyStorage.cs" />
     <Compile Include="..\src\SupplyTransfer.cs" Link="Production\SupplyTransfer.cs" />
     <Compile Include="..\src\*Patch.cs" Link="Production\%(Filename)%(Extension)" />

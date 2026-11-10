@@ -9,6 +9,9 @@ internal static class SupplyTestSetup
     {
         NearbyStorage.Clear();
         SupplyTransfer.Clear();
+        KilnInputSelection.Session.Clear();
+        KilnInputSelection.Preferences = null;
+        SupplyFromStoragePlugin.InputSelectionEnabled = false;
         SupplyFromStoragePlugin.FuelAutomationEnabled = true;
         SupplyFromStoragePlugin.ProcessingAutomationEnabled = true;
         SupplyFromStoragePlugin.StorageRadius = 20f;

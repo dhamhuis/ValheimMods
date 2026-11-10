@@ -126,8 +126,17 @@ internal static class SupplyTransfer
         handledResult = false;
 
         if (item != null || !SupplyFromStoragePlugin.ProcessingAutomationEnabled
-            || user != Player.m_localPlayer || user is not Player player
-            || HasProcessableInventoryItem(smelter, player))
+            || user != Player.m_localPlayer || user is not Player player)
+        {
+            return false;
+        }
+
+        if (KilnInputSelection.TryHandle(smelter, player, out handledResult))
+        {
+            return true;
+        }
+
+        if (HasProcessableInventoryItem(smelter, player))
         {
             return false;
         }
@@ -321,6 +330,90 @@ internal static class SupplyTransfer
         return TransferResult.NoItems;
     }
 
+    internal static TransferResult TransferSelectedInput(
+        Smelter station,
+        Player player,
+        IReadOnlyList<Container> sources,
+        string prefabName)
+    {
+        bool Ready() => CanUse(station, player) && station.m_maxOre > 0
+            && station.IsItemAllowed(prefabName)
+            && PrivateArea.CheckAccess(station.transform.position, 0f, false, false);
+
+        if (!Ready())
+        {
+            return TransferResult.NotReady;
+        }
+
+        if (station.GetQueueSize() >= station.m_maxOre)
+        {
+            return TransferResult.Full;
+        }
+
+        var inventory = player.GetInventory();
+        var item = FindExactItem(inventory, prefabName);
+        Container source = null;
+
+        if (item == null)
+        {
+            foreach (var container in sources)
+            {
+                if (!TryGetInventory(container, player, out var stored))
+                {
+                    continue;
+                }
+
+                item = FindExactItem(stored, prefabName);
+
+                if (item != null)
+                {
+                    inventory = stored;
+                    source = container;
+
+                    break;
+                }
+            }
+        }
+
+        if (item == null)
+        {
+            return TransferResult.NoItems;
+        }
+
+        int before = station.GetQueueSize();
+        bool moved = ConsumeOne(
+            source,
+            inventory,
+            player,
+            station,
+            item,
+            () => Ready() && item.m_dropPrefab != null && item.m_dropPrefab.name == prefabName
+                && station.GetQueueSize() < station.m_maxOre,
+            () => station.RPC_AddOre(player.GetPlayerID(), prefabName, item.m_cheated),
+            () => station.GetQueueSize() > before);
+
+        if (moved)
+        {
+            station.m_addedOreTime = Time.time;
+
+            if (station.m_addOreAnimationDuration > 0)
+            {
+                station.SetAnimation(true);
+            }
+
+            player.Message(MessageHud.MessageType.Center, "$msg_added " + item.m_shared.m_name, 0, null, false);
+        }
+
+        return moved ? TransferResult.Transferred : TransferResult.Failed;
+    }
+
+    private static ItemDrop.ItemData FindExactItem(Inventory inventory, string prefabName)
+    {
+        return inventory?.GetAllItems().FirstOrDefault(item =>
+            item?.m_shared != null && item.m_stack > 0
+            && item.m_dropPrefab != null && item.m_dropPrefab.name == prefabName);
+    }
+
     private static bool TryHandleFuelRequest(
         object station,
         Humanoid user,
@@ -412,8 +505,10 @@ internal static class SupplyTransfer
         Action insert,
         Func<bool> confirmed)
     {
-        if (!TryGetInventory(container, player, out var currentInventory)
-            || currentInventory != inventory || !inventory.ContainsItem(item) || item.m_stack <= 0
+        bool validSource = container == null ? player.GetInventory() == inventory
+            : TryGetInventory(container, player, out var currentInventory) && currentInventory == inventory;
+
+        if (!validSource || !inventory.ContainsItem(item) || item.m_stack <= 0
             || !CanUse(station, player) || !canInsert())
         {
             SupplyFromStoragePlugin.Log.LogWarning("Storage or machine state changed before transfer; no input was added.");
@@ -423,7 +518,11 @@ internal static class SupplyTransfer
 
         int originalStack = item.m_stack;
         int originalCount = CountItems(inventory, item.m_shared.m_name);
-        container.m_inUse = true;
+
+        if (container != null)
+        {
+            container.m_inUse = true;
+        }
 
         try
         {
@@ -491,7 +590,10 @@ internal static class SupplyTransfer
         }
         finally
         {
-            container.m_inUse = false;
+            if (container != null)
+            {
+                container.m_inUse = false;
+            }
         }
     }
 

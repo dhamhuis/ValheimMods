@@ -6,11 +6,11 @@
 
 - **Campfires, bonfires, hearths, fireplaces, braziers and torches** - add their accepted fuel.
 - **Stone Oven and other fuel-enabled cooking stations** - add fuel, not cooking ingredients.
-- **Charcoal Kiln** - supply wood for charcoal.
+- **Charcoal Kiln** - supply Wood, Fine Wood or Core Wood for charcoal.
 - **Smelter and Blast Furnace** - supply fuel and accepted ores.
 - **Windmill** - supply barley.
 - **Spinning Wheel** - supply flax.
-- **Eitr Refinery** - supply its accepted processing inputs.
+- **Eitr Refinery** - supply Sap to its fuel slot or Soft Tissue to its separate processing-input slot.
 - **Hot Tub** - add wood.
 - **Battering Ram** - feed its engine Wood, Fine Wood, Core Wood or Ashwood.
 - **Frost Kiln** - add ice.
@@ -25,7 +25,7 @@ By Hoose.
 - Searches storage in a sphere centered on the local player: 20 meters by default, configurable from 1 to 100 meters.
 - Supplies **one accepted fuel or processing item per valid E action**.
 - Holding E repeats one-item transfers at the game's interaction repeat interval; stations are not filled on load or during updates.
-- Uses accepted items in your inventory first through the normal E interaction. If none are available, supplies one from nearby accessible storage instead.
+- By default, uses accepted items in your inventory first through the normal E interaction. If none are available, supplies one from nearby accessible storage instead.
 - Successful fireplace and fuel-switch transfers show the added-fuel message without a misleading missing-fuel warning.
 - Full fires report that no more fuel can be added when nearby accessible storage has fuel; no fuel is consumed.
 - A storage fallback consumes from the container, not your inventory.
@@ -46,9 +46,19 @@ Install on each player's client; a server-only install does not enable it.
 
 Settings are in `BepInEx/config/hoose.valheim.supplyfromstorage.cfg`; each setting's description lists the machines and items it controls.
 
-- `Automation/Automatic fuel` - fuel for fires, cooking stations, the Stone Oven, Smelter, Blast Furnace, Hot Tub, Frost Kiln and Frost Foundry. Enabled by default.
-- `Automation/Automatic processing inputs` - ore, wood, barley, flax, Eitr Refinery inputs and Battering Ram wood. Enabled by default.
+- `Automation/Automatic fuel` - fuel for fires, cooking stations, the Stone Oven, Smelter, Blast Furnace, Eitr Refinery, Hot Tub, Frost Kiln and Frost Foundry. Enabled by default.
+- `Automation/Automatic processing inputs` - ore, charcoal-kiln wood, barley, flax, Soft Tissue for the Eitr Refinery and Battering Ram wood. Enabled by default.
 - `Storage/Storage radius` - how far around you storage is searched, from 1 to 100 meters. Default 20.
+
+## Experimental kiln input selection
+
+The current source/prepared DLL milestone adds optional **Charcoal Kiln-only** selection; it is not yet live-validated or included in a newly prepared release ZIP. Existing published ZIPs remain their previous snapshot.
+
+Enable `Input selection/Enabled` with `Automation/Automatic processing inputs` enabled. Aim at the kiln input and press F8 (`Input selection preview/Open key`). Highlight a type and choose **Use highlighted**; choosing consumes nothing and subsequent E inserts only that type. **Auto** restores priority-based selection. Cancel keeps the current selection; preference edits save immediately.
+
+The auto-status buttons toggle **Never auto-add**; **Move to first priority** sets precedence. Priorities choose the type across inventory and storage, then prefer inventory within that type. Exclusions cover both sources, but explicit selection/manual item-use can override them. Held E stays on one type and stops on exhaustion until release. Preferences persist locally per character and station type; explicit selection clears on leaving the input or player-session changes.
+
+Disabling selection or automatic processing restores legacy inventory handling, without exclusion protection. Other stations and all fuel slots are unchanged. Invalid preferences block controlled insertion and log an error. This experimental path still requires in-game insertion, hold, persistence and multiplayer checks.
 
 ## Stack with other mods
 

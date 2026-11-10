@@ -69,6 +69,8 @@ On 2026-11-07, targeted IL inspection of both fuel-switch bodies on the baseline
 
 The inspected `Smelter.OnAddOre` body calls `FindCookableItem` on the user's inventory when its item argument is null. If no item is found, it calls `Character.Message` with `$msg_noprocessableitems` and returns before a postfix can run. SupplyFromStorage therefore uses a prefix for this callback: it leaves accepted inventory items to vanilla, transfers from nearby storage only when no accepted inventory item exists, and skips the vanilla no-item branch only when the storage transfer is confirmed. If accessible storage has an accepted item but the station is full, it displays vanilla's `$msg_itsfull` message and does not consume storage. When neither source has a valid item, vanilla runs and displays its no-processable-items message. The prefix uses current conversion entries and rechecks storage through the normal transfer path; runtime message timing and callback behavior still need in-game validation.
 
+The separately opt-in Charcoal Kiln [selection milestone](InputSelection.md) runs before that legacy inventory shortcut and intentionally suppresses vanilla when an excluded/unavailable choice is blocked. Its exact-type inventory/storage policy, inspected mutation/animation path and native held-switch constraints are documented there; consuming selection and preference persistence still await live validation. All other stations retain the legacy path above.
+
 The mod's [storage discovery](../../SupplyFromStorage/src/NearbyStorage.cs) uses a player-centered sphere with a configurable radius (1–100 m, default 20 m) and checks current access, busy state, ward policy, network validity and local container ownership. The transfer path rechecks access, ownership, item identity/quantity, station range and capacity before removing one item. It invokes the machine's vanilla RPC and checks the resulting station state; a rejected transfer attempts to restore the storage item and logs the outcome. A local `m_inUse` reservation and ownership check are not a network-wide atomic lock.
 
 ### Cooking-station ingredients
@@ -129,6 +131,15 @@ On 2026-11-07, the [official 1.0.21 patch notes](https://www.valheimgame.com/new
 Script-pointer equality and field layouts establish shared component identity relative to the known oven/smelter prefabs; external script class names were not resolved directly. On 2026-11-07 the user tested the SupplyFromStorage-only profile and confirmed both northern machines add their needed fuel from storage, but report missing ice/liquid frost immediately before insertion. After the fuel-prefix fix was tested and deployed, the user confirmed, "The frost messages are now fixed." This is local user-reported confirmation for both fuel paths, not multiplayer or save/reload verification. Foundry cast inputs are now excluded from CookFromStorage; the gameplay policy is manual cast selection, not automatic processing-input supply.
 
 For a minimal Foundry input test, local prefab inspection resolved its first conversion's input `ItemDrop.m_GameObject` to `SwordGoldUncooked`. The installed `Terminal.InitTerminal` spawn-command registration documents amount/level/radius arguments; `spawn SwordGoldUncooked 1` requests one accepted unfinished input. This is prefab/command-registration evidence, not an executed spawn or successful storage input transfer. SupplyFromStorage currently supplies Foundry fuel only; storing this cast will not make its gear-input path run under SupplyFromStorage alone.
+
+### Multiple item types per input slot
+
+On 2026-11-09, read-only UnityPy inspection of the local `c4210710` bundle (SHA-256 `84F55CFB24AF51B9F0494FD9D1A355BF009E08545FF8CCF607C7D88D2E4E1EC8`) resolved the serialized conversion inputs for the Charcoal Kiln and Eitr Refinery:
+
+- The Charcoal Kiln's `m_conversion` has three inputs: `$item_wood`, `$item_finewood` and `$item_roundlog` (Core Wood). It supports multiple item types in its processing-input slot.
+- The Eitr Refinery has `$item_sap` as `m_fuelItem` and one `m_conversion` input, `$item_softtissue`. Its separate fuel and processing-input switches each accept one item type; it is supported by SupplyFromStorage, but it does not qualify as a multi-type input slot.
+
+SupplyFromStorage's generic `Smelter` fuel and conversion paths cover both refinery slots. This asset inspection establishes the serialized prefab configuration, not live interaction behavior.
 
 ### Standalone station-boundary audit
 
