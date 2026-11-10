@@ -17,7 +17,9 @@ Storage must be within an inclusive sphere centered on the local player whose ra
 
 For Smelter inputs, the game normally reports “You don't have any processable items” before a postfix can supply from storage. SupplyFromStorage checks storage before vanilla takes that branch, suppresses the message when it successfully adds an item, and preserves vanilla inventory handling and the full-station message.
 
-Fuel-switch requests also check storage before vanilla reports missing fuel. Successful storage fueling shows the normal added-fuel message without first claiming you have no fuel; inventory-first input, manual items and full-station feedback remain unchanged. This includes the Frost Kiln's ice and Frost Foundry's liquid frost.
+Fireplace and fuel-switch requests check storage before vanilla reports missing fuel. Successful storage fueling shows the normal added-fuel message without first claiming you have no fuel, including empty and fueled fires; inventory-first input, fire toggles, manual items and full-station feedback remain unchanged. This includes the Frost Kiln's ice and Frost Foundry's liquid frost.
+
+A full fire reports that no more fuel can be added when accessible storage has its fuel, even if your inventory is empty. No storage fuel is consumed; if neither inventory nor accessible storage has fuel, vanilla's missing-fuel message remains.
 
 For safety, SupplyFromStorage transfers only when the local client owns both the source container and the machine. It does not request ownership, open containers, or modify remote-owned inventories. As a result, storage owned by another player is skipped until normal gameplay gives the local client ownership. Multiplayer behavior, including ownership changes and simultaneous access, still requires in-game testing.
 

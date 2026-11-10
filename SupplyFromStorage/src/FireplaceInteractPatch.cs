@@ -1,5 +1,4 @@
 using HarmonyLib;
-using UnityEngine;
 
 namespace SupplyFromStorage;
 
@@ -7,14 +6,15 @@ namespace SupplyFromStorage;
 internal static class FireplaceInteractPatch
 {
     [HarmonyPrefix]
-    private static void BeforeInteract(Fireplace __instance, bool hold, out bool __state)
+    private static bool BeforeInteract(Fireplace __instance, Humanoid user, bool hold, bool alt, ref bool __result)
     {
-        __state = !hold || Time.time - __instance.m_lastUseTime >= __instance.m_holdRepeatInterval;
-    }
+        if (!SupplyTransfer.TryHandleFireplaceFuel(__instance, user, hold, alt, out bool handledResult))
+        {
+            return true;
+        }
 
-    [HarmonyPostfix]
-    private static void AfterInteract(Fireplace __instance, Humanoid user, bool alt, bool __result, bool __state)
-    {
-        SupplyTransfer.FireplaceInteracted(__instance, user, __state && !alt, __result);
+        __result = handledResult;
+
+        return false;
     }
 }

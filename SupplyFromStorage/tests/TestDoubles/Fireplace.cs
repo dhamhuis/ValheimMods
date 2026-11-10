@@ -34,7 +34,7 @@ public class Fireplace
     [MethodImpl(MethodImplOptions.NoInlining)]
     public bool Interact(Humanoid user, bool hold, bool alt)
     {
-        if (hold && Time.time - m_lastUseTime < m_holdRepeatInterval)
+        if (hold && (m_holdRepeatInterval <= 0 || Time.time - m_lastUseTime < m_holdRepeatInterval))
         {
             return false;
         }
@@ -47,8 +47,25 @@ public class Fireplace
         }
 
         if (!m_canRefill || m_infiniteFuel || m_fuelItem?.m_itemData?.m_shared == null
-            || System.Math.Ceiling(Fuel) >= m_maxFuel || user is not Player player)
+            || user is not Player player)
         {
+            return false;
+        }
+
+        string fuelName = m_fuelItem.m_itemData.m_shared.m_name;
+
+        if (!player.Inventory.HaveItem(fuelName, true))
+        {
+            user.Message(MessageHud.MessageType.Center, "$msg_outof " + fuelName, 0, null, false);
+
+            return false;
+        }
+
+        if (System.Math.Ceiling(Fuel) >= m_maxFuel)
+        {
+            user.Message(MessageHud.MessageType.Center,
+                Localization.instance.Localize("$msg_cantaddmore", fuelName), 0, null, false);
+
             return false;
         }
 
@@ -62,6 +79,8 @@ public class Fireplace
         }
 
         RPC_AddFuel(player.GetPlayerID());
+        user.Message(MessageHud.MessageType.Center,
+            Localization.instance.Localize("$msg_fireadding", fuelName), 0, null, false);
 
         return Fuel > 0;
     }

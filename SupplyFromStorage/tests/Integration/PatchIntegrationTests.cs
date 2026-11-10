@@ -16,6 +16,8 @@ internal static class PatchIntegrationTests
         {
             harmony.PatchAll(typeof(PatchIntegrationTests).Assembly);
             runner.Run(FireplaceInteractionsSupplyOneItemAndRespectVanillaActions);
+            runner.Run(FireplaceFuelMessagesReflectStorage);
+            runner.Run(FullFireplaceFeedbackUsesAccessibleStorage);
             runner.Run(SwitchCallbacksSupplyOneItemPerUse);
             runner.Run(SmelterMessagesReflectAvailableInputs);
             runner.Run(CookingStationFuelSwitchSuppliesOnlyFuel);
@@ -49,17 +51,29 @@ internal static class PatchIntegrationTests
         fireplace.Interact(player, false, false);
         check(fireplace.Fuel == 1 && chest.Inventory.Items[0].m_stack == 3,
             "One fireplace interaction did not transfer exactly one item.");
+        check(player.Messages.Count == 1 && player.LastMessage == "$msg_fireadding $item_wood",
+            "An empty fire showed an out-of-wood message while receiving storage fuel.");
 
+        player.Messages.Clear();
         Time.time += 0.5f;
         fireplace.Interact(player, true, false);
         check(fireplace.Fuel == 2 && chest.Inventory.Items[0].m_stack == 2,
             "A repeated held interaction did not transfer exactly one item.");
+        check(player.Messages.Count == 1 && player.LastMessage == "$msg_fireadding $item_wood",
+            "A fueled fire showed an out-of-wood message while receiving storage fuel.");
 
         fireplace.Interact(player, true, false);
         check(fireplace.Fuel == 2 && chest.Inventory.Items[0].m_stack == 2,
             "The fireplace repeat guard was bypassed.");
+        check(player.Messages.Count == 1, "A rejected held interaction emitted fuel feedback.");
 
-        Reset();
+        player.Messages.Clear();
+        check(fireplace.Interact(player, false, false) && fireplace.Fuel == 3
+            && chest.Inventory.Items[0].m_stack == 1 && player.Messages.Count == 1
+            && player.LastMessage == "$msg_fireadding $item_wood",
+            "A normal fueled-fire interaction did not report only the confirmed storage transfer.");
+
+        player = Reset();
         chest = Chest(1, 0, 0, Item("$item_wood", 2));
         player.Inventory.Items.Add(Item("$item_wood", 1));
         fireplace = new Fireplace
@@ -72,6 +86,8 @@ internal static class PatchIntegrationTests
         check(fireplace.Fuel == 1 && player.Inventory.Items.Count == 0
             && chest.Inventory.Items[0].m_stack == 2,
             "A vanilla inventory transfer also consumed storage fuel.");
+        check(player.Messages.Count == 1 && player.LastMessage == "$msg_fireadding $item_wood",
+            "Inventory fueling did not retain vanilla success feedback.");
 
         Reset();
         chest = Chest(1, 0, 0, Item("$item_wood", 1));
@@ -99,6 +115,121 @@ internal static class PatchIntegrationTests
         fireplace.Interact(Player.m_localPlayer, false, true);
         check(fireplace.Fuel == 0 && chest.Inventory.Items[0].m_stack == 1,
             "An alternate fireplace action supplied storage fuel.");
+    }
+
+    /// <summary>Fireplace feedback preserves failures and reports only success after a confirmed storage transfer.</summary>
+    private static void FireplaceFuelMessagesReflectStorage(Action<bool, string> check)
+    {
+        var player = Reset();
+        var chest = Chest(1, 0, 0);
+        var fireplace = new Fireplace
+        {
+            m_fuelItem = StationDrop("Wood", "$item_wood"),
+            m_maxFuel = 3
+        };
+        fireplace.transform.position = new Vector3(1, 0, 0);
+        check(!fireplace.Interact(player, false, false) && player.Messages.Count == 1
+            && player.LastMessage == "$msg_outof $item_wood",
+            "Missing fuel no longer showed vanilla's out-of-wood message.");
+
+        chest.Inventory.Items.Add(Item("$item_wood", 4));
+        SupplyTransfer.Clear();
+        SupplyFromStoragePlugin.FuelAutomationEnabled = false;
+        player.Messages.Clear();
+        check(!fireplace.Interact(player, false, false) && fireplace.Fuel == 0
+            && chest.Inventory.Items[0].m_stack == 4 && player.LastMessage == "$msg_outof $item_wood",
+            "Disabled automation consumed storage fuel or hid missing-fuel feedback.");
+
+        SupplyFromStoragePlugin.FuelAutomationEnabled = true;
+        chest.Allowed = false;
+        player.Messages.Clear();
+        check(!fireplace.Interact(player, false, false) && fireplace.Fuel == 0
+            && chest.Inventory.Items[0].m_stack == 4 && player.LastMessage == "$msg_outof $item_wood",
+            "Inaccessible storage was consumed or its failure message was hidden.");
+
+        chest.Allowed = true;
+        SupplyTransfer.Clear();
+        fireplace.AcceptFuel = false;
+        player.Messages.Clear();
+        check(!fireplace.Interact(player, false, false) && fireplace.Fuel == 0
+            && chest.Inventory.Items[0].m_stack == 4 && player.LastMessage == "$msg_outof $item_wood",
+            "A rejected fuel transfer reported success or failed to restore storage.");
+
+        fireplace.AcceptFuel = true;
+        SupplyTransfer.Clear();
+        fireplace.Fuel = 3;
+        player.Messages.Clear();
+        check(!fireplace.Interact(player, false, false) && fireplace.Fuel == 3
+            && chest.Inventory.Items[0].m_stack == 4 && player.Messages.Count == 1
+            && player.LastMessage == "$msg_cantaddmore $item_wood",
+            "A full fire with storage fuel did not report that it cannot accept more wood.");
+
+        player.Inventory.Items.Add(Item("$item_wood", 1));
+        player.Messages.Clear();
+        check(!fireplace.Interact(player, false, false) && player.LastMessage == "$msg_cantaddmore $item_wood"
+            && player.Inventory.Items[0].m_stack == 1 && chest.Inventory.Items[0].m_stack == 4,
+            "Full-fire inventory feedback or quantities changed.");
+
+        fireplace.Fuel = 1;
+        fireplace.m_holdRepeatInterval = 0;
+        Time.time += 1;
+        player.Inventory.Items.Clear();
+        player.Messages.Clear();
+        check(!fireplace.Interact(player, true, false) && fireplace.Fuel == 1
+            && chest.Inventory.Items[0].m_stack == 4 && player.Messages.Count == 0,
+            "A fireplace with held interactions disabled accepted storage fuel.");
+    }
+
+    /// <summary>Full fires report capacity when storage has fuel without consuming it or hiding genuine missing-fuel failures.</summary>
+    private static void FullFireplaceFeedbackUsesAccessibleStorage(Action<bool, string> check)
+    {
+        var player = Reset();
+        var chest = Chest(1, 0, 0, Item("$item_wood", 2));
+        var fireplace = new Fireplace
+        {
+            m_fuelItem = StationDrop("Wood", "$item_wood"),
+            m_maxFuel = 10,
+            Fuel = 10
+        };
+        fireplace.transform.position = new Vector3(1, 0, 0);
+
+        for (int attempt = 0; attempt < 2; attempt++)
+        {
+            player.Messages.Clear();
+            check(!fireplace.Interact(player, false, false) && fireplace.Fuel == 10
+                && chest.Inventory.Items[0].m_stack == 2 && player.Inventory.Items.Count == 0
+                && player.Messages.Count == 1 && player.LastMessage == "$msg_cantaddmore $item_wood",
+                "A 10/10 fire reported missing wood, consumed storage, or reported success.");
+        }
+
+        Time.time += 1;
+        fireplace.Fuel = 9.5f;
+        player.Messages.Clear();
+        check(!fireplace.Interact(player, true, false) && fireplace.Fuel == 9.5f
+            && chest.Inventory.Items[0].m_stack == 2 && player.Messages.Count == 1
+            && player.LastMessage == "$msg_cantaddmore $item_wood",
+            "A held interaction ignored rounded-up fireplace capacity.");
+
+        fireplace.Fuel = 10;
+        chest.Allowed = false;
+        player.Messages.Clear();
+        check(!fireplace.Interact(player, false, false) && player.Messages.Count == 1
+            && player.LastMessage == "$msg_outof $item_wood" && chest.Inventory.Items[0].m_stack == 2,
+            "Inaccessible storage incorrectly counted as available fuel for a full fire.");
+
+        chest.Allowed = true;
+        SupplyFromStoragePlugin.FuelAutomationEnabled = false;
+        player.Messages.Clear();
+        check(!fireplace.Interact(player, false, false) && player.Messages.Count == 1
+            && player.LastMessage == "$msg_outof $item_wood" && chest.Inventory.Items[0].m_stack == 2,
+            "Disabled automation replaced vanilla full-fire feedback.");
+
+        SupplyFromStoragePlugin.FuelAutomationEnabled = true;
+        chest.Inventory.Items.Clear();
+        player.Messages.Clear();
+        check(!fireplace.Interact(player, false, false) && player.Messages.Count == 1
+            && player.LastMessage == "$msg_outof $item_wood",
+            "A full fire hid the missing-fuel message when neither source had wood.");
     }
 
     /// <summary>Smelter switch callbacks transfer one fuel or accepted input per E action.</summary>

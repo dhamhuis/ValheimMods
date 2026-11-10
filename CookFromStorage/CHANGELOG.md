@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 (local preview)
+## 1.0.0
 
 - Add one accepted cooking ingredient from nearby accessible storage on each empty food-switch interaction.
 - Preserve cooked-item pickup, player-inventory ingredient priority, manual item selection, station capacity and required-fire checks.

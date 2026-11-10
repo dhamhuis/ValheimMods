@@ -27,23 +27,61 @@ internal static class SupplyTransfer
         return networkView.IsOwner();
     }
 
-    internal static void FireplaceInteracted(
+    internal static bool TryHandleFireplaceFuel(
         Fireplace fireplace,
         Humanoid user,
-        bool interactionReady,
-        bool vanillaHandled)
+        bool hold,
+        bool alt,
+        out bool handledResult)
     {
-        if (!interactionReady || vanillaHandled || !SupplyFromStoragePlugin.FuelAutomationEnabled
-            || user != Player.m_localPlayer || user is not Player player
-            || !ReadyToCheck(_fuelChecks, fireplace))
+        handledResult = false;
+
+        if (alt || !SupplyFromStoragePlugin.FuelAutomationEnabled
+            || user != Player.m_localPlayer || user is not Player player || !CanUse(fireplace, player)
+            || !fireplace.m_canRefill || fireplace.m_infiniteFuel
+            || (hold && (fireplace.m_holdRepeatInterval <= 0
+                || Time.time - fireplace.m_lastUseTime < fireplace.m_holdRepeatInterval))
+            || (fireplace.m_canTurnOff && !hold && ReadFireplaceFuel(fireplace) > 0))
         {
-            return;
+            return false;
         }
 
-        Defer(_fuelChecks, fireplace,
-            CanUse(fireplace, player)
-                ? TransferFireplaceFuel(fireplace, player, NearbyStorage.Find(player))
-                : TransferResult.NotReady);
+        string fuelName = fireplace.m_fuelItem?.m_itemData?.m_shared?.m_name;
+
+        if (string.IsNullOrEmpty(fuelName) || player.GetInventory() == null
+            || player.GetInventory().HaveItem(fuelName, true))
+        {
+            return false;
+        }
+
+        if (!HasFuelSpace(ReadFireplaceFuel(fireplace), fireplace.m_maxFuel))
+        {
+            bool hasStorageFuel = NearbyStorage.Find(player).Any(container =>
+                TryGetInventory(container, player, out var inventory)
+                && inventory.GetAllItems().Any(item => item?.m_shared?.m_name == fuelName && item.m_stack > 0));
+
+            if (!hasStorageFuel)
+            {
+                return false;
+            }
+
+            player.Message(MessageHud.MessageType.Center,
+                Localization.instance.Localize("$msg_cantaddmore", fuelName), 0, null, false);
+
+            return true;
+        }
+
+        bool handled = TryHandleFuelRequest(fireplace, user, null, fuelName,
+            localPlayer => TransferFireplaceFuel(fireplace, localPlayer, NearbyStorage.Find(localPlayer)),
+            Localization.instance.Localize("$msg_fireadding", fuelName));
+
+        if (handled)
+        {
+            fireplace.m_lastUseTime = Time.time;
+            handledResult = true;
+        }
+
+        return handled;
     }
 
     internal static bool TryHandleCookingStationFuel(
@@ -288,7 +326,8 @@ internal static class SupplyTransfer
         Humanoid user,
         ItemDrop.ItemData item,
         string fuelName,
-        Func<Player, TransferResult> transfer)
+        Func<Player, TransferResult> transfer,
+        string successMessage = null)
     {
         if (item != null || !SupplyFromStoragePlugin.FuelAutomationEnabled
             || user != Player.m_localPlayer || user is not Player player
@@ -307,7 +346,7 @@ internal static class SupplyTransfer
             return false;
         }
 
-        player.Message(MessageHud.MessageType.Center, "$msg_added " + fuelName, 0, null, false);
+        player.Message(MessageHud.MessageType.Center, successMessage ?? "$msg_added " + fuelName, 0, null, false);
 
         return true;
     }

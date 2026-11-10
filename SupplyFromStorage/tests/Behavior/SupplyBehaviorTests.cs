@@ -361,13 +361,13 @@ internal static class SupplyBehaviorTests
             m_maxFuel = 1
         };
         fireplace.transform.position = new UnityEngine.Vector3(1, 0, 0);
-        SupplyTransfer.FireplaceInteracted(fireplace, player, true, false);
+        SupplyTransfer.TryHandleFireplaceFuel(fireplace, player, false, false, out _);
         chest.Inventory.Items.Add(Item("$item_wood", 1));
-        SupplyTransfer.FireplaceInteracted(fireplace, player, true, false);
+        SupplyTransfer.TryHandleFireplaceFuel(fireplace, player, false, false, out _);
         check(fireplace.Fuel == 0, "An empty-source check was retried immediately.");
 
         Time.realtimeSinceStartup += 5.1f;
-        SupplyTransfer.FireplaceInteracted(fireplace, player, true, false);
+        SupplyTransfer.TryHandleFireplaceFuel(fireplace, player, false, false, out _);
         check(fireplace.Fuel == 1 && chest.Inventory.Items.Count == 0, "The station was not retried after its cooldown.");
     }
 }

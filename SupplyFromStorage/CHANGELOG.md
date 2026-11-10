@@ -1,6 +1,12 @@
 # Changelog
 
-## 1.0.0 (local preview)
+## 1.0.1
+
+- Fix the misleading "You are out of wood" message when adding fuel from storage to empty or fueled fires. Successful transfers now show the normal added-fuel message.
+- Show the normal cannot-add-more message for full fires when accessible storage has fuel, without consuming wood.
+- Preserve inventory-first fueling, fire toggles, held-interaction timing and vanilla failure feedback.
+
+## 1.0.0
 
 - Add independent fuel and processing-input settings, enabled by default; each valid machine E interaction transfers at most one item.
 - Repeat one-item transfers while E is held, following vanilla interaction timing; do not fill stations during world load or periodic updates.

@@ -15,7 +15,7 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
     public const string PluginName = "SupplyFromStorage";
     public const string PluginAuthor = "Hoose";
     public const string PluginGuid = "hoose.valheim.supplyfromstorage";
-    public const string PluginVersion = "1.0.0";
+    public const string PluginVersion = "1.0.1";
 
     private const string StorageRadiusDescription =
         "How far, in meters, SupplyFromStorage searches for storage around you (a sphere centred on your character). Allowed range: 1 to 100.\n"

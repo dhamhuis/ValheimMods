@@ -26,7 +26,8 @@ By Hoose.
 - Supplies **one accepted fuel or processing item per valid E action**.
 - Holding E repeats one-item transfers at the game's interaction repeat interval; stations are not filled on load or during updates.
 - Uses accepted items in your inventory first through the normal E interaction. If none are available, supplies one from nearby accessible storage instead.
-- Successful fuel-switch transfers show the added-fuel message.
+- Successful fireplace and fuel-switch transfers show the added-fuel message without a misleading missing-fuel warning.
+- Full fires report that no more fuel can be added when nearby accessible storage has fuel; no fuel is consumed.
 - A storage fallback consumes from the container, not your inventory.
 - Fuel and processing-input automation have independent settings, both enabled by default.
 - Rechecks normal container access, ward/busy rules, ownership and station capacity before consuming. Containers and machines owned by another player are skipped.
