@@ -14,6 +14,8 @@ Valheim mods by Hoose, developed as focused BepInEx plugins.
 
 CookFromStorage and SupplyFromStorage are separate plugins: cooking ingredients and Fermenter bases belong to CookFromStorage; machine fuel and Smelter processing inputs belong to SupplyFromStorage.
 
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
 ## Download and install
 
 Each mod's `dist/` folder is included in version control so its prepared DLL and versioned ZIP can be downloaded without rebuilding:
