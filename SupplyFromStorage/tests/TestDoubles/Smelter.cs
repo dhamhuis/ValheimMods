@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public class Smelter
+public class Smelter : Component
 {
     public sealed class ItemConversion
     {
@@ -18,6 +18,7 @@ public class Smelter
     public bool isActiveAndEnabled = true;
     public ZNetView m_nview = new();
     public StationItem m_fuelItem;
+    public Switch m_addOreSwitch;
     public int m_maxOre = 10;
     public int m_maxFuel = 10;
     public List<ItemConversion> m_conversion = new();

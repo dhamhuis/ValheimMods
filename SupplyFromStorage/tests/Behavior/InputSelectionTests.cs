@@ -8,28 +8,46 @@ namespace SupplyFromStorage.Tests;
 
 internal static class InputSelectionTests
 {
+    private static string _stationType;
+
     internal static void Run(TestRunner runner)
     {
         runner.Run(PreferencesRoundTripAndPreserveUnknownTypes);
         runner.Run(InvalidPreferencesAreRejected);
         runner.Run(UnrankedTypesHaveStableOrder);
         runner.Run(PreferenceEditingPreservesOtherRules);
+        runner.Run(PriorityMovesOneStepAndPreservesUnknownTypes);
         runner.Run(HoldLatchesUntilRelease);
         runner.Run(TargetChangesAndMenusStopHeldInput);
         runner.Run(SelectionIsEphemeralButSurvivesRelease);
-        runner.Run(PreferredStorageBeatsOtherInventory);
-        runner.Run(InventoryWinsWithinSelectedType);
-        runner.Run(ExclusionsSuppressVanillaInventoryFallback);
-        runner.Run(ExplicitSelectionOverridesExclusion);
-        runner.Run(ExactSelectionNeverSubstitutes);
-        runner.Run(HoldContinuesIntoStorageWithoutChangingType);
-        runner.Run(FullAndInaccessibleStationsConsumeNothing);
-        runner.Run(SelectedInputSkipsIneligibleStorage);
-        runner.Run(RejectedInventoryTransferRestoresTheSameItem);
-        runner.Run(RejectedStorageTransferRestoresAndUnlocks);
-        runner.Run(PostCommitExceptionDoesNotDuplicate);
-        runner.Run(InvalidPreferencesBlockWithoutFallback);
-        runner.Run(OtherStationsAndExplicitUseRemainVanilla);
+
+        foreach (string stationType in new[] { "$piece_charcoalkiln", "$piece_smelter", "$piece_blastfurnace", "$tool_batteringram" })
+        {
+            _stationType = stationType;
+            runner.Run(PreferredStorageBeatsOtherInventory);
+            runner.Run(InventoryWinsWithinSelectedType);
+            runner.Run(ExclusionsSuppressVanillaInventoryFallback);
+            runner.Run(NoAvailableInputUsesVanillaMessage);
+            runner.Run(ExplicitSelectionOverridesExclusion);
+            runner.Run(ExactSelectionNeverSubstitutes);
+            runner.Run(HoldContinuesIntoStorageThenNextPriority);
+            runner.Run(HoldSurvivesAimingAwayAndBack);
+            runner.Run(FullAndInaccessibleStationsConsumeNothing);
+            runner.Run(SelectedInputSkipsIneligibleStorage);
+            runner.Run(RejectedInventoryTransferRestoresTheSameItem);
+            runner.Run(RejectedStorageTransferRestoresAndUnlocks);
+            runner.Run(PostCommitExceptionDoesNotDuplicate);
+            runner.Run(InvalidPreferencesBlockWithoutFallback);
+            runner.Run(OtherStationsAndExplicitUseRemainVanilla);
+            runner.Run(AutomaticChoiceRequiresDiscoveryAcrossSources);
+            runner.Run(UnknownManualAndLatchedInputsStayBlocked);
+        }
+
+        runner.Run(UnavailableSelectedInputUsesLocalizedDisplayName);
+        runner.Run(StationPreferenceScopesAreIndependent);
+        runner.Run(FreshDefaultsChooseAvailableInputsInRequestedPriority);
+        runner.Run(CrossStationHoldRestartsWithAutomaticChoice);
+        runner.Run(UnsupportedStationsRemainLegacy);
     }
 
     private static void PreferencesRoundTripAndPreserveUnknownTypes(Action<bool, string> check)
@@ -76,6 +94,24 @@ internal static class InputSelectionTests
         check(changed.Serialize() == "FineWood,MissingType,Wood,RoundLog|FineWood", "Reordering lost unknown IDs or exclusions.");
         check(!changed.ToggleExcluded("FineWood").IsExcluded("FineWood"), "Excluded type could not be allowed again.");
         check(preferences.IsExcluded("FineWood"), "Editing mutated the old policy snapshot.");
+    }
+
+    private static void PriorityMovesOneStepAndPreservesUnknownTypes(Action<bool, string> check)
+    {
+        string[] accepted = { "Wood", "FineWood", "RoundLog" };
+        var preferences = InputPreferences.Parse("MissingType,Wood,FineWood|FineWood");
+        var movedDown = preferences.MoveDown("Wood", accepted);
+        check(movedDown.Order(accepted).SequenceEqual(new[] { "FineWood", "Wood", "RoundLog" }),
+            "Moving down did not change precedence by one accepted input.");
+        check(movedDown.Serialize() == "MissingType,FineWood,Wood,RoundLog|FineWood",
+            "Moving down did not preserve unknown preferences and exclusions.");
+
+        var movedUp = movedDown.MoveUp("RoundLog", accepted);
+        check(movedUp.Order(accepted).SequenceEqual(new[] { "FineWood", "RoundLog", "Wood" }),
+            "Moving up did not change precedence by one accepted input.");
+        check(preferences.MoveUp("Wood", accepted).Serialize() == preferences.Serialize()
+            && preferences.MoveDown("RoundLog", accepted).Serialize() == preferences.Serialize(),
+            "Moving an input beyond either end changed the preference.");
     }
 
     private static void HoldLatchesUntilRelease(Action<bool, string> check)
@@ -164,7 +200,18 @@ internal static class InputSelectionTests
             "Excluded-only request fell through to vanilla.");
         SupplyTransfer.TryHandleSmelterInput(station, player, null, out _);
         check(fine.m_stack == 3 && station.QueueSize == 0, "Excluded inventory was consumed.");
-        check(player.Messages.Count == 1, "An exhausted hold repeated its stop message.");
+        check(player.Messages.Count == 1 && player.LastMessage == "Items set to Never auto-add (F8)",
+            "An exhausted hold repeated or lost its exclusion message.");
+    }
+
+    private static void NoAvailableInputUsesVanillaMessage(Action<bool, string> check)
+    {
+        var (player, station) = Setup("Wood,FineWood|");
+        check(SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool result) && !result,
+            "An empty request fell through after selection had resolved it.");
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out _);
+        check(player.Messages.Count == 1 && player.LastMessage == "$msg_noprocessableitems",
+            "Nothing to add did not show vanilla's no-processable-items message once.");
     }
 
     private static void ExplicitSelectionOverridesExclusion(Action<bool, string> check)
@@ -189,7 +236,7 @@ internal static class InputSelectionTests
         check(station.QueueSize == 0 && impostor.m_stack == 2, "Same shared-name impostor or another type was substituted.");
     }
 
-    private static void HoldContinuesIntoStorageWithoutChangingType(Action<bool, string> check)
+    private static void HoldContinuesIntoStorageThenNextPriority(Action<bool, string> check)
     {
         var (player, station) = Setup("Wood,FineWood|");
         player.Inventory.Items.Add(Item("Wood", 1));
@@ -200,14 +247,47 @@ internal static class InputSelectionTests
         SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool first);
         SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool second);
         SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool third);
-        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool exhausted);
-        check(first && second && third && !exhausted && station.QueueSize == 3,
-            "Held transfer failed to continue inventory to/between storage or switched types.");
-        check(fine.m_stack == 4, "Hold switched to a different wood after exhaustion.");
-        KilnInputSelection.Session.Observe(station, false, false, false);
-        KilnInputSelection.Session.Observe(station, true, true, false);
+        check(first && second && third && station.QueueSize == 3 && station.LastInput == "Wood" && fine.m_stack == 4,
+            "Held transfer failed to continue inventory to/between storage or switched types early.");
         SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool next);
-        check(next && station.LastInput == "FineWood", "New E press did not choose the next available type.");
+        check(next && station.LastInput == "FineWood" && fine.m_stack == 3,
+            "Automatic hold did not advance to the next priority after exhaustion.");
+        player.Inventory.Items.Add(Item("Wood", 1));
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool latched);
+        check(latched && station.LastInput == "FineWood", "Automatic hold switched back while its type remained available.");
+        ProcessorInputSelection.Session.Observe(station, false, false, false);
+        ProcessorInputSelection.Session.Observe(station, true, true, false);
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool repress);
+        check(repress && station.LastInput == "Wood", "New E press did not restart from the top priority.");
+    }
+
+    private static void HoldSurvivesAimingAwayAndBack(Action<bool, string> check)
+    {
+        var (player, station) = Setup("Wood,FineWood|");
+        var fine = Item("FineWood", 3);
+        player.Inventory.Items.Add(fine);
+        Select(station, "FineWood");
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool first);
+        ProcessorInputSelection.Session.Observe(null, true, false, false);
+        check(!ProcessorInputSelection.Session.CanInsert, "Hold inserted while aiming at nothing.");
+        ProcessorInputSelection.Session.Observe(station, true, false, false);
+        player.Inventory.Items.Add(Item("Wood", 2));
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool resumed);
+        check(first && resumed && fine.m_stack == 1 && station.LastInput == "FineWood"
+            && ProcessorInputSelection.Session.Selected == "FineWood"
+            && !player.Messages.Any(message => message.Contains("Release")),
+            "Aiming away and back stopped the hold, lost the exact choice, or showed a restart message.");
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out _);
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool exhausted);
+        check(!exhausted && station.LastInput == "FineWood"
+            && player.Messages.Count(message => message.Contains("Release")) == 1,
+            "Exact choice substituted another type after exhaustion.");
+        ProcessorInputSelection.Session.Observe(station, true, false, true);
+        check(!ProcessorInputSelection.Session.CanInsert, "Opening a menu did not stop the hold.");
+        ProcessorInputSelection.Session.Observe(null, true, false, false);
+        ProcessorInputSelection.Session.Observe(null, false, false, false);
+        ProcessorInputSelection.Session.Observe(station, false, false, false);
+        check(ProcessorInputSelection.Session.Selected == null, "Releasing away from the station retained its exact choice.");
     }
 
     private static void FullAndInaccessibleStationsConsumeNothing(Action<bool, string> check)
@@ -282,7 +362,7 @@ internal static class InputSelectionTests
     private static void InvalidPreferencesBlockWithoutFallback(Action<bool, string> check)
     {
         var (player, station) = Setup("Wood|");
-        KilnInputSelection.Preferences = null;
+        ProcessorInputSelection.Preferences = null;
         var wood = Item("Wood", 2);
         player.Inventory.Items.Add(wood);
         check(SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool result) && !result,
@@ -295,10 +375,11 @@ internal static class InputSelectionTests
         var (player, station) = Setup("Wood|Wood");
         var wood = Item("Wood", 2);
         player.Inventory.Items.Add(wood);
+        player.KnownMaterials.Clear();
         check(!SupplyTransfer.TryHandleSmelterInput(station, player, wood, out _), "Explicit item-use was intercepted.");
-        station.m_name = "$piece_smelter";
+        station.m_name = "$piece_windmill";
         check(!SupplyTransfer.TryHandleSmelterInput(station, player, null, out _), "Other station's inventory path was intercepted.");
-        station.m_name = "$piece_charcoalkiln";
+        station.m_name = _stationType;
         SupplyFromStoragePlugin.InputSelectionEnabled = false;
         check(!SupplyTransfer.TryHandleSmelterInput(station, player, null, out _), "Disabled selection changed legacy inventory behavior.");
     }
@@ -306,7 +387,7 @@ internal static class InputSelectionTests
     private static (Player Player, Smelter Station) Setup(string preferences)
     {
         var player = SupplyTestSetup.Reset();
-        var station = new Smelter { m_name = "$piece_charcoalkiln" };
+        var station = new Smelter { m_name = _stationType };
 
         foreach (string type in new[] { "Wood", "FineWood", "RoundLog" })
         {
@@ -314,8 +395,9 @@ internal static class InputSelectionTests
         }
 
         SupplyFromStoragePlugin.InputSelectionEnabled = true;
-        KilnInputSelection.Preferences = InputPreferences.Parse(preferences);
-        KilnInputSelection.Session.Observe(station, true, true, false);
+        ProcessorInputSelection.Preferences = InputPreferences.Parse(preferences);
+        ProcessorInputSelection.PreferenceStationType = _stationType;
+        ProcessorInputSelection.Session.Observe(station, true, true, false);
 
         return (player, station);
     }
@@ -330,8 +412,147 @@ internal static class InputSelectionTests
 
     private static void Select(Smelter station, string type)
     {
-        KilnInputSelection.Session.Observe(station, false, false, false);
-        KilnInputSelection.Session.Select(type);
-        KilnInputSelection.Session.Observe(station, true, true, false);
+        ProcessorInputSelection.Session.Observe(station, false, false, false);
+        ProcessorInputSelection.Session.Select(type);
+        ProcessorInputSelection.Session.Observe(station, true, true, false);
+    }
+
+    private static void StationPreferenceScopesAreIndependent(Action<bool, string> check)
+    {
+        check(ProcessorInputSelection.PreferenceSection("$piece_charcoalkiln") == "Charcoal Kiln preferences",
+            "Existing kiln config section changed.");
+        check(ProcessorInputSelection.PreferenceSection("$tool_batteringram") == "Battering Ram preferences",
+            "Ram preferences do not have their own named section.");
+        check(new[] { "$piece_charcoalkiln", "$piece_smelter", "$piece_blastfurnace", "$tool_batteringram" }
+            .Select(ProcessorInputSelection.PreferenceSection).Distinct().Count() == 4,
+            "Two station types share the same preference section.");
+        var (player, station) = Setup("Wood|");
+        var wood = Item("Wood", 2);
+        player.Inventory.Items.Add(wood);
+        ProcessorInputSelection.PreferenceStationType = "$piece_charcoalkiln";
+        station.m_name = "$piece_smelter";
+        check(SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool result) && !result
+            && wood.m_stack == 2, "A stale preference scope allowed cross-station insertion.");
+    }
+
+    /// <summary>Fresh defaults choose each available type in station priority order, with no automatic exclusions.</summary>
+    private static void FreshDefaultsChooseAvailableInputsInRequestedPriority(Action<bool, string> check)
+    {
+        var cases = new[]
+        {
+            (Station: "$piece_smelter", Priority: new[] { "CopperOre", "CopperScrap", "TinOre", "BronzeScrap", "IronOre", "IronScrap", "SilverOre" }),
+            (Station: "$piece_blastfurnace", Priority: new[] { "BlackMetalScrap", "FlametalOreNew", "GoldOre" }),
+            (Station: "$piece_charcoalkiln", Priority: new[] { "Wood", "FineWood", "RoundLog" }),
+            (Station: "$tool_batteringram", Priority: new[] { "Wood", "FineWood", "RoundLog", "Blackwood" })
+        };
+
+        foreach (var scenario in cases)
+        {
+            var preferences = InputPreferences.Parse(ProcessorInputSelection.DefaultPreferences(scenario.Station));
+            var available = scenario.Priority.Reverse().Concat(new[] { "ModdedInput" }).ToList();
+
+            foreach (string expected in scenario.Priority)
+            {
+                check(preferences.Choose(available) == expected,
+                    $"Fresh {scenario.Station} defaults did not prefer {expected} over remaining inputs.");
+                available.Remove(expected);
+            }
+
+            check(preferences.Choose(available) == "ModdedInput",
+                $"Fresh {scenario.Station} defaults blocked an additional runtime input.");
+            check(scenario.Priority.All(type => !preferences.IsExcluded(type)),
+                $"Fresh {scenario.Station} defaults excluded a supported input.");
+        }
+    }
+
+    private static void UnavailableSelectedInputUsesLocalizedDisplayName(Action<bool, string> check)
+    {
+        _stationType = "$tool_batteringram";
+        var (player, station) = Setup("FineWood|");
+        station.m_conversion.Find(conversion => conversion.m_from.name == "FineWood")
+            .m_from.m_itemData.m_shared.m_name = "$item_finewood";
+        Select(station, "FineWood");
+
+        bool handled = SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool result);
+        check(handled && !result && player.Messages.Count == 1
+            && player.Messages[0] == "No Finewood available. Release use before trying again.",
+            "Unavailable-input feedback exposed the prefab ID instead of the localized item name.");
+    }
+
+    private static void CrossStationHoldRestartsWithAutomaticChoice(Action<bool, string> check)
+    {
+        _stationType = "$piece_smelter";
+        var (player, station) = Setup("Wood|");
+        player.Inventory.Items.Add(Item("Wood", 3));
+        Select(station, "Wood");
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool first);
+        station.QueueSize = station.m_maxOre;
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool full);
+        var furnace = new Smelter { m_name = "$piece_blastfurnace", m_conversion = station.m_conversion };
+        ProcessorInputSelection.PreferenceStationType = furnace.m_name;
+        ProcessorInputSelection.Session.Observe(null, true, false, false);
+        ProcessorInputSelection.Session.Observe(furnace, true, false, false);
+        check(ProcessorInputSelection.Session.Selected == null, "Exact selection followed the hold to another station.");
+        SupplyTransfer.TryHandleSmelterInput(furnace, player, null, out bool held);
+        check(first && !full && held && furnace.QueueSize == 1 && furnace.LastInput == "Wood",
+            "A continuing hold did not restart on the newly aimed station.");
+    }
+
+    private static void UnsupportedStationsRemainLegacy(Action<bool, string> check)
+    {
+        foreach (string name in new[] { "$piece_eitrrefinery", "$piece_windmill", "$piece_spinningwheel", "$modded_smelter" })
+        {
+            check(!ProcessorInputSelection.Supports(name), "Selection expanded to an unsupported station: " + name);
+        }
+    }
+
+    private static void AutomaticChoiceRequiresDiscoveryAcrossSources(Action<bool, string> check)
+    {
+        var (player, station) = Setup("Wood,FineWood,RoundLog|");
+        player.KnownMaterials.Clear();
+        player.KnownMaterials.Add("RoundLog");
+        var wood = Item("Wood", 2);
+        var fine = Item("FineWood", 2);
+        var known = Item("RoundLog", 1);
+        player.Inventory.Items.AddRange(new[] { fine, known });
+        SupplyTestSetup.Chest(1, 0, 0, wood);
+        string saved = ProcessorInputSelection.Preferences.Serialize();
+        check(SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool inserted) && inserted
+            && station.LastInput == "RoundLog" && known.m_stack == 0 && wood.m_stack == 2 && fine.m_stack == 2,
+            "Auto preferred an undiscovered inventory/storage input over a discovered type.");
+        Select(station, null);
+        check(SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool blocked) && !blocked
+            && station.QueueSize == 1 && wood.m_stack == 2 && fine.m_stack == 2,
+            "Unknown-only input fell through to vanilla or consumed storage.");
+        player.KnownMaterials.Add("Wood");
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool resumed);
+        check(!resumed && wood.m_stack == 2, "Discovering an input restarted a stopped hold.");
+        Select(station, null);
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool discovered);
+        check(discovered && wood.m_stack == 1 && ProcessorInputSelection.Preferences.Serialize() == saved,
+            "Discovery failed to restore saved priority after release/repress.");
+    }
+
+    private static void UnknownManualAndLatchedInputsStayBlocked(Action<bool, string> check)
+    {
+        var (player, station) = Setup("Wood,FineWood|");
+        var wood = Item("Wood", 3);
+        var fine = Item("FineWood", 2);
+        player.Inventory.Items.AddRange(new[] { wood, fine });
+        player.KnownMaterials.Remove("Wood");
+        Select(station, "Wood");
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool manual);
+        check(!manual && wood.m_stack == 3 && fine.m_stack == 2
+            && !player.LastMessage.Contains("Wood"), "Stale manual choice consumed or named an undiscovered input.");
+        player.KnownMaterials.Add("Wood");
+        Select(station, null);
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool first);
+        player.KnownMaterials.Remove("Wood");
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool latched);
+        check(first && latched && wood.m_stack == 2 && fine.m_stack == 1 && station.LastInput == "FineWood",
+            "An automatic hold bypassed discovery instead of advancing to the next discovered type.");
+        player.KnownMaterials.Add("Wood");
+        SupplyTransfer.TryHandleSmelterInput(station, player, null, out bool resumed);
+        check(resumed && wood.m_stack == 2 && fine.m_stack == 0, "An automatic hold switched back while its type remained available.");
     }
 }

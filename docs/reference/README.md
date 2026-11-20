@@ -6,17 +6,17 @@ Read this index before library discovery. It is an agent routing map, not an exh
 
 | Task or symbols | Read first | Coverage and gaps |
 | --- | --- | --- |
-| Dependencies, DLL locations, publicizing, `BaseUnityPlugin`, `Harmony`, Unity lifecycle | [Libraries and runtime](Libraries.md) | Dependency map, local fingerprints, startup/cleanup patterns; configuration and custom UI APIs not investigated. |
+| Dependencies, DLL locations, publicizing, `BaseUnityPlugin`, `Harmony`, Unity lifecycle | [Libraries and runtime](Libraries.md) | Dependency map, local fingerprints, startup/cleanup patterns; configuration and custom UI APIs beyond the bounded picker IMGUI signatures are not investigated. |
 | Station interaction, `CraftingStation.Interact`, `HaveRepairableItems`, `RepairOneItem` | [Station repair](Repair.md) | Installed signatures and AutoRepair guards; game-internal eligibility/effects need targeted inspection. |
 | Recipes, `CountItems`, `RemoveItem`, `HaveRequirementItems`, `GetFirstRequiredItem`, `DoCrafting` | [Crafting and inventories](Crafting.md) | Existing scoped patches and ingredient plan; new recipe systems require discovery. |
 | Containers, access, wards, `ZNetView`, ownership RPCs, persistence | [Storage and ownership](Storage.md) | Existing selection/ownership protocol; multiplayer and persistence not live-verified here. |
 | Fuel and processing inputs, `Fireplace`, `CookingStation`, `Fermenter`, `Smelter`, `Windmill` | [Fuel and processing](Processing.md) | Installed component signatures, cooking/Fermenter input paths and SupplyFromStorage hooks; prefab mappings and machine behavior need in-game verification. |
-| Item picker, input preferences, targeting, `Player.TakeInput`, cursor/input capture | [Input selection and picker UI](InputSelection.md) | User-tested preview plus opt-in kiln selection/policy/held-type logic tests and inspected mutation path; live consuming/persistence/controller/multiplayer checks remain pending. |
+| Item picker, input preferences, discovery, held-input session, `Player.IsMaterialKnown`, targeting, cursor/input capture | [Input selection and picker UI](InputSelection.md) | Shared Supply/Cook picker; in-game testing reported complete by the user, with later checklist details unrecorded. Controller/multiplayer checks remain unverified. |
 | World time, `EnvMan.instance`, `GetDayFraction`, `GetDay` | [World time display](WorldTime.md) | Public time and day APIs and implementation; live timing and HUD behavior need in-game verification. |
 | Missing API, changed signature, unfamiliar system, revalidation | [API discovery skill](../../.github/skills/valheim-api-discovery/SKILL.md) | Bounded inspection, evidence recording, validation, and maintenance procedure. |
 | Build, deploy, test, package | [Development guide](../Development.md) | Commands and validation limits; not an API catalog. |
 
-Console/debug commands, spawning, combat, world generation, custom UI, and other unlisted systems are **not investigated**, not unsupported. Add focused topics when a task establishes useful knowledge; do not prepopulate speculative catalogs.
+Console/debug commands, spawning, combat, world generation, UI systems beyond the bounded picker IMGUI signatures, and other unlisted systems are **not investigated**, not unsupported. Add focused topics when a task establishes useful knowledge; do not prepopulate speculative catalogs.
 
 ## Evidence and freshness contract
 

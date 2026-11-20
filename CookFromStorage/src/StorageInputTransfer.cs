@@ -28,24 +28,30 @@ internal static class StorageInputTransfer
         Action insert,
         Func<bool> wasInserted)
     {
-        if (!TryGetInventory(container, player, out var currentInventory)
-            || currentInventory != inventory || !inventory.ContainsItem(item) || item.m_stack <= 0
+        bool validSource = container == null ? player.GetInventory() == inventory
+            : TryGetInventory(container, player, out var currentInventory) && currentInventory == inventory;
+
+        if (!validSource || !inventory.ContainsItem(item) || item.m_stack <= 0
             || !canInsert())
         {
-            CookFromStoragePlugin.Log.LogWarning($"Storage or {stationName} changed before transfer; no ingredient was added.");
+            CookFromStoragePlugin.Log.LogWarning($"Source inventory or {stationName} changed before transfer; no ingredient was added.");
 
             return false;
         }
 
         int originalStack = item.m_stack;
         int originalCount = CountItems(inventory, item.m_shared.m_name);
-        container.m_inUse = true;
+
+        if (container != null)
+        {
+            container.m_inUse = true;
+        }
 
         try
         {
             if (!inventory.RemoveItem(item, 1))
             {
-                CookFromStoragePlugin.Log.LogWarning("Storage ingredient changed before transfer; no station input was added.");
+                CookFromStoragePlugin.Log.LogWarning("Source ingredient changed before transfer; no station input was added.");
 
                 return false;
             }
@@ -70,7 +76,7 @@ internal static class StorageInputTransfer
             catch (Exception exception)
             {
                 CookFromStoragePlugin.Log.LogError(
-                    $"Could not confirm {stationName} transfer; storage ingredient remains consumed to avoid duplicate insertion. {exception}");
+                    $"Could not confirm {stationName} transfer; source ingredient remains consumed to avoid duplicate insertion. {exception}");
 
                 return false;
             }
@@ -80,7 +86,7 @@ internal static class StorageInputTransfer
                 if (transferFailure != null)
                 {
                     CookFromStoragePlugin.Log.LogError(
-                        $"{stationName} accepted the storage ingredient, but its transfer callback threw after insertion. {transferFailure}");
+                        $"{stationName} accepted the source ingredient, but its transfer callback threw after insertion. {transferFailure}");
                 }
 
                 return true;
@@ -94,20 +100,23 @@ internal static class StorageInputTransfer
             }
             catch (Exception exception)
             {
-                CookFromStoragePlugin.Log.LogError($"{stationName} rejected an ingredient and storage restoration threw. {exception}");
+                CookFromStoragePlugin.Log.LogError($"{stationName} rejected an ingredient and source restoration threw. {exception}");
 
                 throw;
             }
 
             CookFromStoragePlugin.Log.LogError(
-                $"{stationName} rejected a storage ingredient; source restoration {(restored ? "succeeded" : "failed")}."
+                $"{stationName} rejected a source ingredient; source restoration {(restored ? "succeeded" : "failed")}."
                 + (transferFailure == null ? string.Empty : $" Transfer callback error: {transferFailure}"));
 
             return false;
         }
         finally
         {
-            container.m_inUse = false;
+            if (container != null)
+            {
+                container.m_inUse = false;
+            }
         }
     }
 

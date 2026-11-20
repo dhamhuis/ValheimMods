@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.2
+
+- Take control of what goes into your stations with the F8 input menu: choose an exact item or set automatic priorities and exclusions. For example, turn Wood into charcoal while keeping Finewood and Corewood out of automatic kiln input.
+- Expand the menu to the Smelter, Blast Furnace and Battering Ram engine alongside the Charcoal Kiln. Selection is enabled by default for new configurations; existing saved settings are preserved.
+- Save automatic preferences per character and station type. Priorities span inventory and accessible storage, preferring inventory within the chosen type; explicit choices can override exclusions.
+- Show and automatically select only inputs discovered by the current character (no spoilers), while retaining preferences for hidden inputs.
+- Continue held input when aiming away and back; Auto advances to the next available priority when a type runs out. Explicit selections do not substitute another type.
+
 ## 1.0.1
 
 - Fix the misleading "You are out of wood" message when adding fuel from storage to empty or fueled fires. Successful transfers now show the normal added-fuel message.

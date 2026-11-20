@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using System.Linq;
 using ValheimMods.Common;
 using ValheimMods.Common.InputSelection;
 
 namespace SupplyFromStorage;
 
-internal static class KilnInputPreview
+internal static class ProcessorInputPreview
 {
     internal static Smelter GetStation(Player player)
     {
@@ -16,7 +17,9 @@ internal static class KilnInputPreview
         var hover = player.GetHoverObject();
         var station = hover != null ? hover.GetComponentInParent<Smelter>() : null;
 
-        if (station == null || station.m_name != "$piece_charcoalkiln" || !station.isActiveAndEnabled
+        if (station == null || !ProcessorInputSelection.Supports(station.m_name)
+            || (!SupplyFromStoragePlugin.InputSelectionEnabled && station.m_name != "$piece_charcoalkiln")
+            || !station.isActiveAndEnabled
             || station.m_nview == null || !station.m_nview.IsValid() || !station.m_nview.IsOwner()
             || station.m_addOreSwitch == null || hover.GetComponentInParent<Switch>() != station.m_addOreSwitch
             || station.m_conversion == null
@@ -47,7 +50,8 @@ internal static class KilnInputPreview
             var item = conversion?.m_from;
 
             if (item?.m_itemData?.m_shared == null || string.IsNullOrEmpty(item.name)
-                || !station.IsItemAllowed(item.name) || !seen.Add(item.name))
+                || !station.IsItemAllowed(item.name) || !seen.Add(item.name)
+                || !player.IsMaterialKnown(item.m_itemData.m_shared.m_name))
             {
                 continue;
             }
@@ -65,6 +69,9 @@ internal static class KilnInputPreview
             items.Add(new InputPreviewItem(item, InputPreviewItem.Count(player.GetInventory(), item.name), stored));
         }
 
-        return items.Count > 0 ? new InputPreviewSnapshot(station, station.m_name, items) : null;
+        return new InputPreviewSnapshot(
+            station,
+            station.m_name,
+            ProcessorInputSelection.OrderPreviewItems(station.m_name, items).ToList());
     }
 }

@@ -131,7 +131,7 @@ internal static class SupplyTransfer
             return false;
         }
 
-        if (KilnInputSelection.TryHandle(smelter, player, out handledResult))
+        if (ProcessorInputSelection.TryHandle(smelter, player, out handledResult))
         {
             return true;
         }
@@ -338,6 +338,7 @@ internal static class SupplyTransfer
     {
         bool Ready() => CanUse(station, player) && station.m_maxOre > 0
             && station.IsItemAllowed(prefabName)
+            && ProcessorInputSelection.IsDiscovered(station, player, prefabName)
             && PrivateArea.CheckAccess(station.transform.position, 0f, false, false);
 
         if (!Ready())

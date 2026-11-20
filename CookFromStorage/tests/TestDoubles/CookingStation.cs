@@ -1,25 +1,34 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public class CookingStation
+public class CookingStation : Component
 {
     public Transform transform = new();
     public bool isActiveAndEnabled = true;
     public ZNetView m_nview = new();
     public Transform[] m_slots = [new Transform(), new Transform()];
     public List<ItemConversion> m_conversion = new();
+    public List<ItemMessage> m_incompatibleItems = new();
     public bool m_requireFire;
     public Switch m_addFoodSwitch;
     public bool FireLit = true;
     public bool DoneItem;
     public bool RejectInput;
     public string m_name = "$piece_cookingstation";
+    public string m_noCookableItemsMessage = "$msg_nocookitems";
 
     public string name { get; set; } = "CookingStation";
 
     public List<string> AddedItems { get; } = new();
+
+    public List<bool> CheatedInputs { get; } = new();
+
+    public Action OnInsert { get; set; }
+
+    public bool ThrowAfterInsertion { get; set; }
 
     public bool HaveDoneItem() => DoneItem;
 
@@ -56,12 +65,20 @@ public class CookingStation
 
     public void RPC_AddItem(long sender, string itemName, bool cheated)
     {
+        OnInsert?.Invoke();
+
         if (!m_nview.IsOwner() || RejectInput || !IsItemAllowed(itemName) || GetFreeSlot() < 0)
         {
             return;
         }
 
         AddedItems.Add(itemName);
+        CheatedInputs.Add(cheated);
+
+        if (ThrowAfterInsertion)
+        {
+            throw new InvalidOperationException("Modeled post-commit cooking effect failure.");
+        }
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -103,7 +120,7 @@ public class CookingStation
         var ingredient = FindCookableItem(player.GetInventory());
         if (ingredient == null)
         {
-            user.Message(MessageHud.MessageType.Center, "$msg_nocookableitems", 0, null, false);
+            user.Message(MessageHud.MessageType.Center, m_noCookableItemsMessage, 0, null, false);
             return false;
         }
 
@@ -128,5 +145,11 @@ public class CookingStation
     {
         public ItemDrop m_from;
         public ItemDrop m_to;
+    }
+
+    public sealed class ItemMessage
+    {
+        public ItemDrop m_item;
+        public string m_message;
     }
 }

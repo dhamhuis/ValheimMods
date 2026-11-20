@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -19,7 +20,7 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
     public const string PluginName = "SupplyFromStorage";
     public const string PluginAuthor = "Hoose";
     public const string PluginGuid = "hoose.valheim.supplyfromstorage";
-    public const string PluginVersion = "1.0.1";
+    public const string PluginVersion = "1.0.2";
 
     private const string StorageRadiusDescription =
         "How far, in meters, SupplyFromStorage searches for storage around you (a sphere centred on your character). Allowed range: 1 to 100.\n"
@@ -42,7 +43,7 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
         + "- Barley for the Windmill and flax for the Spinning Wheel.\n"
         + "- Soft Tissue for the Eitr Refinery (sap uses its separate fuel slot).\n"
         + "- Wood, Fine Wood, Core Wood or Ashwood for the Battering Ram engine.\n"
-        + "Each machine's own accepted-item list decides what can be added. Your inventory is used first unless the optional kiln input-selection mode is enabled. Disabling this also disables kiln input selection and restores vanilla inventory handling; it does not affect 'Automatic fuel'.";
+        + "Each machine's own accepted-item list decides what can be added. Your inventory is used first unless optional input selection is enabled for the Charcoal Kiln, Smelter, Blast Furnace or Battering Ram engine. Disabling this also disables input selection and restores vanilla inventory handling; it does not affect 'Automatic fuel'.";
 
     private static ConfigEntry<bool> _automaticFuel;
     private static ConfigEntry<bool> _automaticProcessingInputs;
@@ -50,14 +51,16 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
     private static ConfigEntry<bool> _inputSelectionEnabled;
     private static ConfigEntry<KeyCode> _previewKey;
     private Harmony _harmony;
-    private InputPickerPreview _inputPreview;
+    private InputPickerRegistration _inputPreview;
     private ConfigEntry<bool> _previewEnabled;
     private bool _initialized;
     private bool _previewInitializationFailed;
-    private ConfigEntry<string> _kilnPreferences;
+    private ConfigEntry<string> _processorPreferences;
     private long _preferencePlayer;
     private string _loadedPreferences;
+    private string _preferenceStationType;
     private Player _selectionPlayer;
+    private readonly Dictionary<ConfigEntry<string>, string> _failedPreferenceSaves = new();
 
     internal static ManualLogSource Log { get; private set; }
 
@@ -100,12 +103,12 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
             "Input selection preview",
             "Open key",
             KeyCode.F8,
-            "Keyboard key to open the preview while aiming at the Charcoal Kiln's input. Escape closes it. Choose a key not used by other mods.");
+            "Keyboard key for the kiln preview or enabled Charcoal Kiln/Smelter/Blast Furnace/Battering Ram input picker. Aim at the material input or ram engine-loading input, not a separate fuel or operating interaction. Escape closes it. Choose a key not used by other mods.");
         _inputSelectionEnabled = Config.Bind(
             "Input selection",
             "Enabled",
-            false,
-            "Enable selected-type insertion, per-character automatic priorities/exclusions and held-E type locking for the Charcoal Kiln only, while Automatic processing inputs is enabled. Type priority applies across inventory and storage; inventory wins within the chosen type. Other stations stay unchanged. Uses the preview Open key.");
+            true,
+            "Enable selected-type insertion, separate per-character/per-station-type priorities/exclusions and held-E type locking for the Charcoal Kiln, Smelter, Blast Furnace and Battering Ram engine while Automatic processing inputs is enabled. Type priority applies across inventory and storage; inventory wins within the chosen type. Separate fuel callbacks and other stations stay unchanged. Uses the preview Open key. Existing enabled selection also enables the ram engine.");
 
         NearbyStorage.Initialize();
         SupplyTransfer.Clear();
@@ -128,7 +131,7 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
         }
 
         _initialized = true;
-        Log.LogInfo($"{PluginName} {PluginVersion} loaded; E interactions add one accepted fuel or processing input from nearby accessible storage ({NearbyStorage.Radius:0.#}m).");
+        Log.LogInfo($"{PluginName} {PluginVersion} loaded; E interactions add one accepted fuel or processing input from nearby accessible storage ({NearbyStorage.Radius:0.#}m); input selection enabled={InputSelectionEnabled}.");
     }
 
     private void Update()
@@ -142,7 +145,7 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
         {
             _inputPreview?.Dispose();
             _inputPreview = null;
-            KilnInputSelection.Session.Clear();
+            ProcessorInputSelection.Session.Clear();
 
             return;
         }
@@ -154,24 +157,24 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
                 _inputPreview = InputPickerPreview.Register(
                     () => _previewEnabled.Value || InputSelectionEnabled,
                     () => _previewKey.Value,
-                    KilnInputPreview.Read,
+                    ProcessorInputPreview.Read,
                     new InputPickerControls(
                         () => InputSelectionEnabled,
-                        () => KilnInputSelection.Preferences,
+                        () => ProcessorInputSelection.Preferences,
                         SavePreferences,
-                        () => KilnInputSelection.Session.Selected,
-                        prefab => KilnInputSelection.Session.Select(prefab),
+                        () => ProcessorInputSelection.Session.Selected,
+                        prefab => ProcessorInputSelection.Session.Select(prefab),
                         ObserveInput,
-                        () => KilnInputSelection.Session.Context == null ? null
+                        () => ProcessorInputSelection.Session.Context == null ? null
                             : $"{_previewKey.Value}: choose / preferences",
-                        () => KilnInputSelection.Session.HeldType,
-                        () => KilnInputSelection.Session.IsStopped));
-                Log.LogInfo($"{PluginName}: kiln input picker registered; selection enabled={InputSelectionEnabled}, open key {_previewKey.Value}.");
+                        () => ProcessorInputSelection.Session.HeldType,
+                        () => ProcessorInputSelection.Session.IsStopped));
+                Log.LogInfo($"{PluginName}: processor input picker registered (Charcoal Kiln, Smelter, Blast Furnace, Battering Ram); selection enabled={InputSelectionEnabled}, open key {_previewKey.Value}.");
             }
             catch (Exception exception)
             {
                 _previewInitializationFailed = true;
-                Log.LogError($"{PluginName}: input picker initialization failed until restart. Controlled kiln insertion is blocked when selection is enabled; other automation is unchanged. {exception}");
+                Log.LogError($"{PluginName}: input picker initialization failed until restart. Controlled processor insertion is blocked when selection is enabled; other automation is unchanged. {exception}");
 
                 return;
             }
@@ -180,12 +183,13 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
         if (Player.m_localPlayer == null || Player.m_localPlayer.IsDead()
             || Player.m_localPlayer.IsTeleporting() || Player.m_localPlayer.InCutscene())
         {
-            KilnInputSelection.Session.Clear();
+            ProcessorInputSelection.Session.Clear();
             _preferencePlayer = 0;
-            _kilnPreferences = null;
+            _preferenceStationType = null;
+            _processorPreferences = null;
             _loadedPreferences = null;
             _selectionPlayer = null;
-            KilnInputSelection.Preferences = null;
+            ProcessorInputSelection.Preferences = null;
         }
 
         _inputPreview?.Update();
@@ -200,13 +204,13 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
     {
         _inputPreview?.Dispose();
         _inputPreview = null;
-        KilnInputSelection.Session.Clear();
+        ProcessorInputSelection.Session.Clear();
     }
 
     private void OnDestroy()
     {
         _inputPreview?.Dispose();
-        KilnInputSelection.Session.Clear();
+        ProcessorInputSelection.Session.Clear();
         SupplyTransfer.Clear();
         NearbyStorage.Clear();
         _harmony?.UnpatchSelf();
@@ -221,62 +225,64 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
     {
         if (!InputSelectionEnabled)
         {
-            KilnInputSelection.Session.Clear();
+            ProcessorInputSelection.Session.Clear();
 
             return;
         }
 
-        LoadPreferences(player);
         bool held = ZInput.GetButton("Use") || ZInput.GetButton("JoyUse");
         bool pressed = ZInput.GetButtonDown("Use") || ZInput.GetButtonDown("JoyUse");
-        var station = KilnInputPreview.GetStation(player);
-        object previous = KilnInputSelection.Session.Context;
-        bool active = KilnInputSelection.Session.CanInsert;
-        KilnInputSelection.Session.Observe(station, held, pressed, !allowed);
-
-        if (held && !pressed && active && !ReferenceEquals(previous, station))
-        {
-            player.Message(MessageHud.MessageType.Center,
-                "Kiln input stopped: target or access changed. Release use before trying again.", 0, null, false);
-        }
+        var station = ProcessorInputPreview.GetStation(player);
+        LoadPreferences(player, station?.m_name);
+        ProcessorInputSelection.Session.Observe(station, held, pressed, !allowed);
     }
 
-    private void LoadPreferences(Player player)
+    private void LoadPreferences(Player player, string stationType)
     {
         if (_selectionPlayer != player)
         {
             _selectionPlayer = player;
             _preferencePlayer = 0;
+            _preferenceStationType = null;
             _loadedPreferences = null;
-            _kilnPreferences = null;
-            KilnInputSelection.Session.Clear();
-            KilnInputSelection.Preferences = null;
+            _processorPreferences = null;
+            ProcessorInputSelection.Session.Clear();
+            ProcessorInputSelection.Preferences = null;
         }
 
         long id = player.GetPlayerID();
 
-        if (id == 0)
+        if (id == 0 || !ProcessorInputSelection.Supports(stationType))
         {
-            KilnInputSelection.Preferences = null;
+            ProcessorInputSelection.Preferences = null;
+            _preferenceStationType = null;
+            ProcessorInputSelection.PreferenceStationType = null;
 
             return;
         }
 
-        if (id != _preferencePlayer)
+        if (id != _preferencePlayer || stationType != _preferenceStationType)
         {
+            bool playerChanged = id != _preferencePlayer;
             _preferencePlayer = id;
+            _preferenceStationType = stationType;
+            ProcessorInputSelection.PreferenceStationType = stationType;
             _loadedPreferences = null;
-            _kilnPreferences = null;
-            KilnInputSelection.Preferences = null;
-            KilnInputSelection.Session.Clear();
+            _processorPreferences = null;
+            ProcessorInputSelection.Preferences = null;
+
+            if (playerChanged)
+            {
+                ProcessorInputSelection.Session.Clear();
+            }
 
             try
             {
-                _kilnPreferences = Config.Bind(
-                    "Charcoal Kiln preferences",
+                _processorPreferences = Config.Bind(
+                    ProcessorInputSelection.PreferenceSection(stationType),
                     "Player " + id.ToString(CultureInfo.InvariantCulture),
-                    "Wood,FineWood,RoundLog|",
-                    "Per-character priority|exclusions. Comma-separated prefab IDs; RoundLog is Core Wood. Exclusions affect automatic E from inventory AND storage, not explicit selection. Edit in the picker. Unknown IDs are preserved.");
+                    ProcessorInputSelection.DefaultPreferences(stationType),
+                    "Per-character, per-station-type priority|exclusions. Comma-separated prefab IDs; RoundLog is Core Wood. Empty priority uses ordinal prefab order. Exclusions affect automatic E from inventory AND storage, not explicit selection. Edit in the picker. Unknown IDs are preserved.");
             }
             catch (IOException exception)
             {
@@ -288,44 +294,56 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
             }
         }
 
-        if (_kilnPreferences == null)
+        if (_processorPreferences == null)
         {
             return;
         }
 
-        if (_kilnPreferences.Value == _loadedPreferences)
+        if (_failedPreferenceSaves.TryGetValue(_processorPreferences, out string failedValue))
+        {
+            if (_processorPreferences.Value == failedValue)
+            {
+                ProcessorInputSelection.Preferences = null;
+
+                return;
+            }
+
+            _failedPreferenceSaves.Remove(_processorPreferences);
+        }
+
+        if (_processorPreferences.Value == _loadedPreferences)
         {
             return;
         }
 
-        _loadedPreferences = _kilnPreferences.Value;
+        _loadedPreferences = _processorPreferences.Value;
 
         try
         {
-            KilnInputSelection.Preferences = InputPreferences.Parse(_loadedPreferences);
+            ProcessorInputSelection.Preferences = InputPreferences.Parse(_loadedPreferences);
         }
         catch (FormatException exception)
         {
-            KilnInputSelection.Preferences = null;
-            Log.LogError($"Invalid kiln preferences for the current character; automatic kiln insertion is blocked. {exception.Message}");
+            ProcessorInputSelection.Preferences = null;
+            Log.LogError($"Invalid {ProcessorInputSelection.PreferenceSection(stationType)} for the current character; automatic station insertion is blocked. {exception.Message}");
         }
     }
 
     private void SavePreferences(InputPreferences preferences)
     {
-        if (_kilnPreferences == null)
+        if (_processorPreferences == null)
         {
-            Log.LogError("Cannot save kiln preferences without an initialized player configuration.");
+            Log.LogError("Cannot save station preferences without an initialized player configuration.");
 
             return;
         }
 
         try
         {
-            _kilnPreferences.Value = preferences.Serialize();
+            _processorPreferences.Value = preferences.Serialize();
             Config.Save();
-            _loadedPreferences = _kilnPreferences.Value;
-            KilnInputSelection.Preferences = preferences;
+            _loadedPreferences = _processorPreferences.Value;
+            ProcessorInputSelection.Preferences = preferences;
         }
         catch (IOException exception)
         {
@@ -339,11 +357,17 @@ public sealed class SupplyFromStoragePlugin : BaseUnityPlugin
 
     private void PreferenceSaveFailed(Exception exception)
     {
-        _loadedPreferences = _kilnPreferences?.Value;
-        KilnInputSelection.Preferences = null;
-        Log.LogError($"Could not persist kiln preferences; automatic insertion is blocked until restart/config correction. {exception}");
+        _loadedPreferences = _processorPreferences?.Value;
+        ProcessorInputSelection.Preferences = null;
+
+        if (_processorPreferences != null)
+        {
+            _failedPreferenceSaves[_processorPreferences] = _processorPreferences.Value;
+        }
+
+        Log.LogError($"Could not persist station preferences; automatic insertion is blocked until restart/config correction. {exception}");
         Player.m_localPlayer?.Message(MessageHud.MessageType.Center,
-            "Could not save kiln preferences. Insertion blocked; check the log.", 0, null, false);
+            "Could not save station preferences. Insertion blocked; check the log.", 0, null, false);
     }
 
     private static bool IsRegistered(Type targetType, string methodName, Type patchType)

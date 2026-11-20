@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 public class Player : Humanoid
@@ -9,6 +10,8 @@ public class Player : Humanoid
 
     public Inventory Inventory { get; set; } = new();
 
+    public HashSet<string> KnownMaterials { get; } = new(StringComparer.Ordinal);
+
     public CraftingStation Station { get; set; } = new();
 
     public bool Dead { get; set; }
@@ -17,7 +20,13 @@ public class Player : Humanoid
 
     public Action OnRequirementCheck { get; set; }
 
+    public UnityEngine.GameObject HoverObject { get; set; }
+
+    public UnityEngine.GameObject GetHoverObject() => HoverObject;
+
     public Inventory GetInventory() => Inventory;
+
+    public bool IsMaterialKnown(string sharedName) => KnownMaterials.Contains(sharedName);
 
     public CraftingStation GetCurrentCraftingStation() => Station;
 

@@ -1,3 +1,3 @@
-public sealed class Switch
+public sealed class Switch : UnityEngine.Component
 {
 }

@@ -21,6 +21,9 @@ internal static class PatchIntegrationTests
             runner.Run(SwitchCallbacksSupplyOneItemPerUse);
             runner.Run(SmelterMessagesReflectAvailableInputs);
             runner.Run(KilnSelectionSuppressesVanillaAndConsumesExactlyOnce);
+            runner.Run(SmelterSelectionPreservesFuelAndNativeCallbacks);
+            runner.Run(BlastFurnaceSelectionPreservesFuelAndNativeCallbacks);
+            runner.Run(BatteringRamSelectionHandlesAllWoodWithoutOutputs);
             runner.Run(CookingStationFuelSwitchSuppliesOnlyFuel);
             runner.Run(FrostKilnFuelMessagesReflectStorage);
             runner.Run(FrostFoundryFuelMessagesReflectStorage);
@@ -36,6 +39,128 @@ internal static class PatchIntegrationTests
         }
     }
 
+    private static void SmelterSelectionPreservesFuelAndNativeCallbacks(Action<bool, string> check)
+    {
+        CheckProcessorSelection(check, "$piece_smelter", "CopperOre", "TinOre");
+    }
+
+    private static void BlastFurnaceSelectionPreservesFuelAndNativeCallbacks(Action<bool, string> check)
+    {
+        CheckProcessorSelection(check, "$piece_blastfurnace", "BlackMetalScrap", "FlametalOreNew");
+    }
+
+    private static void BatteringRamSelectionHandlesAllWoodWithoutOutputs(Action<bool, string> check)
+    {
+        var player = Reset();
+        var station = new Smelter { m_name = "$tool_batteringram", m_maxOre = 25 };
+
+        foreach (string type in new[] { "Wood", "FineWood", "RoundLog", "Blackwood" })
+        {
+            station.m_conversion.Add(new Smelter.ItemConversion { m_from = StationDrop(type, type) });
+        }
+
+        SupplyFromStoragePlugin.InputSelectionEnabled = true;
+        ProcessorInputSelection.PreferenceStationType = station.m_name;
+        ProcessorInputSelection.Preferences = ValheimMods.Common.InputSelection.InputPreferences.Parse("|Wood,FineWood,RoundLog,Blackwood");
+
+        foreach (string type in new[] { "Wood", "FineWood", "RoundLog", "Blackwood" })
+        {
+            var item = Item(type, 2);
+            item.m_dropPrefab = new GameObject(type);
+            player.Inventory.Items.Add(item);
+            ProcessorInputSelection.Session.Observe(station, false, false, false);
+            ProcessorInputSelection.Session.Select(type);
+            ProcessorInputSelection.Session.Observe(station, true, true, false);
+            check(station.OnAddOre(null, player, null) && item.m_stack == 1 && station.LastInput == type,
+                "Ram rejected exact excluded wood with a null conversion output: " + type);
+        }
+
+        var ashwood = Item("Blackwood", 3);
+        ashwood.m_dropPrefab = new GameObject("Blackwood");
+        Chest(1, 0, 0, ashwood);
+        player.Inventory.Items.Clear();
+        ProcessorInputSelection.Session.Observe(station, false, false, false);
+        ProcessorInputSelection.Preferences = ValheimMods.Common.InputSelection.InputPreferences.Parse("Blackwood|FineWood");
+        ProcessorInputSelection.Session.Select(null);
+        ProcessorInputSelection.Session.Observe(station, true, true, false);
+        check(station.OnAddOre(null, player, null) && ashwood.m_stack == 2 && station.LastInput == "Blackwood",
+            "Ram did not supply exact Ashwood from storage.");
+        station.QueueSize = 25;
+        check(!station.OnAddOre(null, player, null) && ashwood.m_stack == 2,
+            "Full ram consumed wood.");
+        station.QueueSize = 24;
+        check(!station.OnAddOre(null, player, null) && ashwood.m_stack == 2,
+            "Ram resumed a full-stopped hold when engine consumption freed space.");
+        ProcessorInputSelection.Session.Observe(station, false, false, false);
+        ProcessorInputSelection.Session.Observe(station, true, true, false);
+        check(station.OnAddOre(null, player, null) && ashwood.m_stack == 1 && station.QueueSize == 25,
+            "Ram failed to load after release/repress.");
+
+        var kiln = new Smelter { m_name = "$piece_charcoalkiln", m_conversion = station.m_conversion };
+        ProcessorInputSelection.PreferenceStationType = kiln.m_name;
+        ProcessorInputSelection.Session.Observe(kiln, true, false, false);
+        check(kiln.OnAddOre(null, player, null) && ashwood.m_stack == 0 && kiln.QueueSize == 1,
+            "Continuing hold did not restart on the newly aimed kiln.");
+        ashwood = Item("Blackwood", 1);
+        ashwood.m_dropPrefab = new GameObject("Blackwood");
+        Chest(1, 0, 0, ashwood);
+        SupplyFromStoragePlugin.InputSelectionEnabled = false;
+        station.QueueSize = 0;
+        check(station.OnAddOre(null, player, null) && ashwood.m_stack == 0,
+            "Disabled selection broke legacy ram storage supply.");
+        check(station.m_fuelItem == null && station.Fuel == 0,
+            "Ram input selection created separate fuel state.");
+    }
+
+    private static void CheckProcessorSelection(Action<bool, string> check, string stationType, string preferred, string excluded)
+    {
+        var player = Reset();
+        var station = new Smelter
+        {
+            m_name = stationType,
+            m_fuelItem = StationDrop("Coal", "$item_coal")
+        };
+        station.m_conversion.Add(new Smelter.ItemConversion { m_from = StationDrop(preferred, preferred) });
+        station.m_conversion.Add(new Smelter.ItemConversion { m_from = StationDrop(excluded, excluded) });
+        var inventory = Item(excluded, 3);
+        inventory.m_dropPrefab = new GameObject(excluded);
+        player.Inventory.Items.Add(inventory);
+        var stored = Item(preferred, 2);
+        stored.m_dropPrefab = new GameObject(preferred);
+        var coal = Item("$item_coal", 3);
+        coal.m_dropPrefab = new GameObject("Coal");
+        Chest(1, 0, 0, stored, coal);
+        SupplyFromStoragePlugin.InputSelectionEnabled = true;
+        ProcessorInputSelection.PreferenceStationType = stationType;
+        ProcessorInputSelection.Preferences = ValheimMods.Common.InputSelection.InputPreferences.Parse(
+            preferred + "," + excluded + "|" + excluded);
+        ProcessorInputSelection.Session.Observe(station, true, true, false);
+
+        check(station.OnAddOre(null, player, null) && station.LastInput == preferred
+            && stored.m_stack == 1 && inventory.m_stack == 3 && coal.m_stack == 3,
+            "Controlled processor did not choose preferred storage input exactly once.");
+        check(station.OnAddOre(null, player, null) && stored.m_stack == 0 && station.QueueSize == 2,
+            "Native repeat did not retain its type.");
+        check(!station.OnAddOre(null, player, null) && inventory.m_stack == 3 && station.QueueSize == 2,
+            "Exhaustion consumed an excluded alternative.");
+        check(station.OnAddFuel(null, player, null) && coal.m_stack == 2
+            && station.GetFuel() == 1 && station.QueueSize == 2, "Selection policy changed the independent fuel input.");
+
+        ProcessorInputSelection.Session.Observe(station, false, false, false);
+        ProcessorInputSelection.Session.Select(excluded);
+        ProcessorInputSelection.Session.Observe(station, true, true, false);
+        check(station.OnAddOre(null, player, null) && inventory.m_stack == 2
+            && station.LastInput == excluded, "Explicit selected ore did not override its auto exclusion.");
+
+        SupplyFromStoragePlugin.ProcessingAutomationEnabled = false;
+        check(station.OnAddOre(null, player, null) && inventory.m_stack == 1,
+            "Disabling processing did not restore vanilla inventory insertion.");
+        SupplyFromStoragePlugin.ProcessingAutomationEnabled = true;
+        SupplyFromStoragePlugin.InputSelectionEnabled = false;
+        check(station.OnAddOre(null, player, null) && inventory.m_stack == 0,
+            "Disabling selection did not restore legacy inventory insertion.");
+    }
+
     private static void KilnSelectionSuppressesVanillaAndConsumesExactlyOnce(Action<bool, string> check)
     {
         var player = Reset();
@@ -49,8 +174,9 @@ internal static class PatchIntegrationTests
         wood.m_dropPrefab = new GameObject("Wood");
         Chest(1, 0, 0, wood);
         SupplyFromStoragePlugin.InputSelectionEnabled = true;
-        KilnInputSelection.Preferences = ValheimMods.Common.InputSelection.InputPreferences.Parse("Wood,FineWood|FineWood");
-        KilnInputSelection.Session.Observe(station, true, true, false);
+        ProcessorInputSelection.Preferences = ValheimMods.Common.InputSelection.InputPreferences.Parse("Wood,FineWood|FineWood");
+        ProcessorInputSelection.PreferenceStationType = station.m_name;
+        ProcessorInputSelection.Session.Observe(station, true, true, false);
         check(station.OnAddOre(null, player, null), "Patched kiln did not accept preferred storage input.");
         check(station.QueueSize == 1 && wood.m_stack == 1 && fine.m_stack == 3,
             "Patched kiln also ran vanilla or consumed an excluded inventory type.");
@@ -58,10 +184,10 @@ internal static class PatchIntegrationTests
         check(station.QueueSize == 2 && fine.m_stack == 3, "Second native callback did not supply exactly one matching type.");
         check(!station.OnAddOre(null, player, null) && fine.m_stack == 3 && station.QueueSize == 2,
             "Exhaustion fell through to vanilla's excluded inventory item.");
-        KilnInputSelection.Session.Observe(station, false, false, false);
-        KilnInputSelection.Session.Select("FineWood");
+        ProcessorInputSelection.Session.Observe(station, false, false, false);
+        ProcessorInputSelection.Session.Select("FineWood");
         check(station.QueueSize == 2 && fine.m_stack == 3, "Choosing a type consumed an item.");
-        KilnInputSelection.Session.Observe(station, true, true, false);
+        ProcessorInputSelection.Session.Observe(station, true, true, false);
         check(station.OnAddOre(null, player, null) && station.QueueSize == 3 && fine.m_stack == 2,
             "Explicit selection did not override exclusion exactly once through the real prefix.");
     }

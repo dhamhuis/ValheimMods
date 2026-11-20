@@ -74,6 +74,58 @@ public sealed class InputPreferences
         return new InputPreferences(ordered, _excluded);
     }
 
+    public InputPreferences MoveUp(string prefabName, IEnumerable<string> accepted)
+    {
+        return Move(prefabName, accepted, -1);
+    }
+
+    public InputPreferences MoveDown(string prefabName, IEnumerable<string> accepted)
+    {
+        return Move(prefabName, accepted, 1);
+    }
+
+    private InputPreferences Move(string prefabName, IEnumerable<string> accepted, int direction)
+    {
+        ValidateName(prefabName);
+        var acceptedOrder = Order(accepted).ToList();
+        int index = acceptedOrder.IndexOf(prefabName);
+
+        if (index < 0)
+        {
+            throw new ArgumentException("The input type is not accepted by this station.", nameof(prefabName));
+        }
+
+        int targetIndex = index + direction;
+
+        if (targetIndex < 0 || targetIndex >= acceptedOrder.Count)
+        {
+            return this;
+        }
+
+        string displaced = acceptedOrder[targetIndex];
+        acceptedOrder[targetIndex] = acceptedOrder[index];
+        acceptedOrder[index] = displaced;
+        var acceptedNames = new HashSet<string>(acceptedOrder, StringComparer.Ordinal);
+        var existingOrder = _priority.Concat(acceptedOrder).Distinct(StringComparer.Ordinal);
+        var reordered = new List<string>();
+        int acceptedIndex = 0;
+
+        foreach (string name in existingOrder)
+        {
+            if (acceptedNames.Contains(name))
+            {
+                reordered.Add(acceptedOrder[acceptedIndex]);
+                acceptedIndex++;
+            }
+            else
+            {
+                reordered.Add(name);
+            }
+        }
+
+        return new InputPreferences(reordered.ToArray(), _excluded);
+    }
+
     private static string[] ParseList(string value)
     {
         if (value.Length == 0)

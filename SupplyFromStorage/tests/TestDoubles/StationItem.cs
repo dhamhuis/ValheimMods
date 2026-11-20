@@ -1,6 +1,3 @@
-public sealed class StationItem
+public sealed class StationItem : ItemDrop
 {
-    public string name;
-
-    public ItemDrop.ItemData m_itemData;
 }

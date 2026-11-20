@@ -1,6 +1,6 @@
 namespace UnityEngine;
 
-public class Transform
+public class Transform : Component
 {
     public Vector3 position;
 }
