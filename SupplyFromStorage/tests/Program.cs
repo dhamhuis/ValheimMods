@@ -9,6 +9,8 @@ internal static class Program
     {
         var runner = new TestRunner();
         SupplyBehaviorTests.Run(runner);
+        InputPreviewTests.Run(runner);
+        InputSelectionTests.Run(runner);
         PatchIntegrationTests.Run(runner);
         Console.WriteLine($"Passed {runner.TestsPassed} tests and {runner.AssertionsPassed} assertions.");
     }

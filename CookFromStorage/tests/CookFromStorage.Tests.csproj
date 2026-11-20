@@ -9,6 +9,12 @@
     <Compile Include="..\..\ValheimMods.Common\src\ContainerRegistry.cs" Link="Production\ContainerRegistry.cs" />
     <Compile Include="..\..\ValheimMods.Common\src\StorageRange.cs" Link="Production\StorageRange.cs" />
     <Compile Include="..\..\ValheimMods.Common\src\Crafting\*.cs" Link="Production\Crafting\%(Filename)%(Extension)" />
+    <Compile Include="..\..\ValheimMods.Common\src\InputSelection\InputPreviewItem.cs" Link="Production\InputPreviewItem.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\InputSelection\InputPreviewSnapshot.cs" Link="Production\InputPreviewSnapshot.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\InputSelection\InputPreferences.cs" Link="Production\InputPreferences.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\InputSelection\InputTypeSession.cs" Link="Production\InputTypeSession.cs" />
+    <Compile Include="..\src\CookingInputSelection.cs" Link="Production\CookingInputSelection.cs" />
+    <Compile Include="..\src\CookingInputPreview.cs" Link="Production\CookingInputPreview.cs" />
     <Compile Include="..\src\NearbyStorage.cs" Link="Production\NearbyStorage.cs" />
     <Compile Include="..\src\ContainerCreatedPatch.cs" Link="Production\ContainerCreatedPatch.cs" />
     <Compile Include="..\src\ContainerDestroyedPatch.cs" Link="Production\ContainerDestroyedPatch.cs" />

@@ -58,7 +58,7 @@ internal static class FermenterTransfer
         return false;
     }
 
-    private static bool CanUse(Fermenter station, Player player)
+    internal static bool CanUse(Fermenter station, Player player)
     {
         return station != null && station.isActiveAndEnabled && station.m_nview != null
             && station.m_nview.IsValid() && station.m_nview.IsOwner()

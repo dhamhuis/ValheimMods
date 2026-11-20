@@ -9,6 +9,10 @@ internal static class SupplyTestSetup
     {
         NearbyStorage.Clear();
         SupplyTransfer.Clear();
+        ProcessorInputSelection.Session.Clear();
+        ProcessorInputSelection.Preferences = null;
+        ProcessorInputSelection.PreferenceStationType = null;
+        SupplyFromStoragePlugin.InputSelectionEnabled = false;
         SupplyFromStoragePlugin.FuelAutomationEnabled = true;
         SupplyFromStoragePlugin.ProcessingAutomationEnabled = true;
         SupplyFromStoragePlugin.StorageRadius = 20f;
@@ -18,6 +22,11 @@ internal static class SupplyTestSetup
 
         var player = Player.m_localPlayer = new Player();
         player.transform.position = new Vector3(0, 0, 0);
+        player.KnownMaterials.UnionWith(new[]
+        {
+            "Wood", "FineWood", "RoundLog", "Blackwood", "CopperOre", "TinOre", "BlackMetalScrap",
+            "FlametalOreNew", "$item_wood", "$item_finewood"
+        });
 
         return player;
     }

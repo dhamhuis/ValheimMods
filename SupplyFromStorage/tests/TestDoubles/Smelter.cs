@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public class Smelter
+public class Smelter : Component
 {
     public sealed class ItemConversion
     {
@@ -12,9 +12,13 @@ public class Smelter
     }
 
     public Transform transform = new();
+    public string m_name;
+    public float m_addedOreTime;
+    public float m_addOreAnimationDuration;
     public bool isActiveAndEnabled = true;
     public ZNetView m_nview = new();
     public StationItem m_fuelItem;
+    public Switch m_addOreSwitch;
     public int m_maxOre = 10;
     public int m_maxFuel = 10;
     public List<ItemConversion> m_conversion = new();
@@ -22,6 +26,13 @@ public class Smelter
     public int QueueSize { get; set; }
     public int UpdateCalls { get; private set; }
     public string LastInput { get; private set; }
+    public bool LastCheated { get; private set; }
+    public System.Action BeforeAddOre { get; set; }
+    public System.Action AfterAddOre { get; set; }
+
+    public void SetAnimation(bool active)
+    {
+    }
 
     public float GetFuel() => Fuel;
 
@@ -42,11 +53,16 @@ public class Smelter
 
     public void RPC_AddOre(long sender, string name, bool cheated)
     {
+        BeforeAddOre?.Invoke();
+
         if (m_nview.Owner && IsItemAllowed(name))
         {
             QueueSize++;
             LastInput = name;
+            LastCheated = cheated;
         }
+
+        AfterAddOre?.Invoke();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

@@ -7,12 +7,20 @@ internal static class CookTestSetup
     internal static Player Reset()
     {
         NearbyStorage.Clear();
+        CookingInputSelection.Session.Clear();
+        CookingInputSelection.Preferences = null;
+        CookingInputSelection.PreferenceStationType = null;
+        CookFromStoragePlugin.InputSelectionEnabled = false;
         CookFromStoragePlugin.AutomaticIngredientsEnabled = true;
         CookFromStoragePlugin.StorageRadius = 20f;
         PrivateArea.Allowed = true;
 
         var player = Player.m_localPlayer = new Player();
         player.transform.position = new Vector3(0, 0, 0);
+        player.KnownMaterials.UnionWith(new[]
+        {
+            "$item_raw_meat", "$item_necktail", "$item_moddedfood", "$item_healthbase", "$item_staminabase"
+        });
 
         return player;
     }

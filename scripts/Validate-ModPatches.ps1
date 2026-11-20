@@ -27,11 +27,11 @@ try {
     $game = [Mono.Cecil.AssemblyDefinition]::ReadAssembly((Join-Path $ValheimInstallDir 'valheim_Data\Managed\assembly_valheim.dll'))
     $plugin = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($pluginPath)
     $assemblies = @($plugin)
-    if (@($plugin.MainModule.GetTypeReferences() | Where-Object {
-        $_.FullName -eq 'ValheimMods.Common.Crafting.RecipeStorage'
+    if (@($plugin.MainModule.AssemblyReferences | Where-Object {
+        $_.Name -eq 'ValheimMods.Common'
     }).Count -gt 0) {
         $commonPath = Join-Path $modRoot 'dist\ValheimMods.Common.dll'
-        if (-not (Test-Path -LiteralPath $commonPath)) { throw "Shared recipe engine DLL not found: $commonPath" }
+        if (-not (Test-Path -LiteralPath $commonPath)) { throw "Shared runtime DLL not found: $commonPath" }
         $common = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($commonPath)
         $assemblies += $common
     }

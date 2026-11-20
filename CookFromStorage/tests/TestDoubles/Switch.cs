@@ -1,3 +1,3 @@
-public class Switch
+public class Switch : UnityEngine.Component
 {
 }

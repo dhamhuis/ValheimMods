@@ -23,6 +23,11 @@ internal static class CookingTransfer
             return false;
         }
 
+        if (CookingInputSelection.TryHandle(station, user, out handledResult))
+        {
+            return true;
+        }
+
         if (!CanUse(station, player))
         {
             bool networkValid = station.m_nview != null && station.m_nview.IsValid();
@@ -165,7 +170,7 @@ internal static class CookingTransfer
         return transferred ? TransferResult.Transferred : TransferResult.Failed;
     }
 
-    private static bool CanUse(CookingStation station, Player player)
+    internal static bool CanUse(CookingStation station, Player player)
     {
         return station != null && station.isActiveAndEnabled && station.m_nview != null
             && station.m_name != "$piece_frostfoundry"

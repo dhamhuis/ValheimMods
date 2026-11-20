@@ -10,6 +10,7 @@ internal static class Program
         var runner = new TestRunner();
         PatchIntegrationTests.Run(runner);
         FermenterIntegrationTests.Run(runner);
+        InputSelectionIntegrationTests.Run(runner);
         RecipeIntegrationTests.Run(runner);
         Console.WriteLine($"Passed {runner.TestsPassed} tests and {runner.AssertionsPassed} assertions.");
     }

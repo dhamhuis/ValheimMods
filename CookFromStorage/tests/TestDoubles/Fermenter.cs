@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public class Fermenter
+public class Fermenter : Component
 {
     public Transform transform = new();
     public bool isActiveAndEnabled = true;
@@ -12,6 +12,7 @@ public class Fermenter
     public List<ItemConversion> m_conversion = new();
     public bool m_hasRoof = true;
     public bool m_exposed;
+    public string m_name = "$piece_fermenter";
 
     public enum Status
     {

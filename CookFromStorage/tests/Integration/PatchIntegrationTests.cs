@@ -227,7 +227,7 @@ internal static class PatchIntegrationTests
         station.FireLit = false;
 
         bool result = station.Interact(player, false, false);
-        check(!result && player.LastMessage == "$msg_nocookableitems" && station.AddedItems.Count == 0,
+        check(!result && player.LastMessage == "$msg_nocookitems" && station.AddedItems.Count == 0,
             "No accepted ingredients incorrectly showed a fire or capacity message.");
     }
 
