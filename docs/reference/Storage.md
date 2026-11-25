@@ -1,9 +1,9 @@
 # Storage and ownership
 
-Status: Verified - installed signatures and repository implementation only.
+Status: Verified - installed signatures, repository implementation, and targeted chest-opening method bodies.
 Last verified: 2026-11-06.
 Evidence: Targeted Mono.Cecil inspection at the [library baseline](Libraries.md); [NearbyStorage](../../ValheimMods.Common/src/Crafting/NearbyStorage.cs), [StorageCrafting](../../ValheimMods.Common/src/Crafting/StorageCrafting.cs), and lifecycle/response patches linked below.
-Limitations: Access and protocol descriptions below are mod policy inferred directly from source, not an independent verification of game RPC internals, authorization, network ordering, or disk persistence.
+Limitations: Mod access and protocol descriptions below are inferred from repository source. The targeted game-body inspection is limited to the opening flow noted below; network ordering, multiplayer behavior, and disk persistence remain unverified in game.
 
 ## Use when
 
@@ -35,6 +35,10 @@ Private members are accessed through the publicized reference. `Load()` returns 
 
 ### Ownership and mutation policy
 
+On 2026-11-24, targeted Mono.Cecil method-body inspection of `assembly_valheim.dll` SHA-256 `9F959C0396EC4240D47FCBE5D0D062C428CC627244506DB5EA567F9D77B2B769` established the following vanilla opening flow. `Container.Interact(Humanoid character, bool hold, bool alt)` checks applicable ward and container access, then sends `RPC_RequestOpen` with the player's ID. On the existing network owner, `Container.RPC_RequestOpen(long uid, long playerID)` checks busy state and access; an accepted request calls `ZDOMan.ForceSendZDO` and `ZDO.SetOwner(uid)` with the requesting network peer before sending a granted `RPC_OpenResponse`. The response opens the inventory UI. `Container.IsOwner()` delegates to `ZNetView.IsOwner()`.
+
+This is network-object ownership, distinct from player access permissions. The inspected flow does not make ownership a permanent player claim or restrict transfer to the first open. It does not establish how long ownership lasts after closing, when it may change later, or live multiplayer behavior. BuildFromStorage filters for current local ownership and closed, accessible storage; opening and closing a chest is a possible way to make it eligible, not a guarantee or a prerequisite when it is already locally owned.
+
 [StorageCrafting](../../ValheimMods.Common/src/Crafting/StorageCrafting.cs) plans the needed sources, then for each non-owned source sends `InvokeRPC("RPC_RequestOpen", player.GetPlayerID())`. It waits for both a granted response and local `IsOwner()`, with a five-second real-time deadline and ongoing validity checks.
 
 [StorageOwnershipResponsePatch](../../ValheimMods.Common/src/Crafting/StorageOwnershipResponsePatch.cs) routes matching responses into that pending state rather than treating them as ordinary manual chest opens. Late-response guards and [manual-interaction handling](../../ValheimMods.Common/src/Crafting/PendingContainerInteractionPatch.cs) distinguish pending craft responses from a valid later player open.
@@ -53,6 +57,6 @@ The cleanup does not establish an ownership-transfer-back protocol. `Container.S
 
 ## Unknowns
 
-- The full game method bodies for `RPC_RequestOpen`, `RPC_OpenResponse`, ownership transfer, inventory-change callbacks, `Load`, and `Save`.
+- The full game method bodies for ownership transfer internals, inventory-change callbacks, `Load`, and `Save`, and how long ownership lasts after a chest closes.
 - Live multiplayer ordering, competing players/mods, timeout/disconnect recovery, dedicated servers, and persisted contents after reload.
 - Other container-like objects not covered by this registry. Follow the [discovery workflow](../../.github/skills/valheim-api-discovery/SKILL.md) rather than assuming they are unsupported.

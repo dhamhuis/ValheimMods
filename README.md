@@ -9,6 +9,7 @@ Valheim mods by Hoose, developed as focused BepInEx plugins.
 | [AutoRepair](AutoRepair/README.md) | Repairs eligible inventory equipment when you interact with a crafting station. |
 | [WorldClock](WorldClock/README.md) | Displays configurable Valheim world time in a local HUD label. |
 | [CraftFromStorage](CraftFromStorage/README.md) | Crafts and upgrades at non-food stations using accessible storage near the player (20 m by default, configurable). |
+| [BuildFromStorage](BuildFromStorage/README.md) | Builds with the Hammer using accessible nearby storage (20 m by default, configurable). |
 | [CookFromStorage](CookFromStorage/README.md) | Prepares food-station recipes and supplies cooking racks/ovens and Fermenters from nearby accessible storage. |
 | [SupplyFromStorage](SupplyFromStorage/README.md) | Supplies one accepted fuel or processing input from nearby accessible storage per machine E interaction. |
 
@@ -23,6 +24,7 @@ Each mod's `dist/` folder is included in version control so its prepared DLL and
 - [AutoRepair downloads](AutoRepair/dist/)
 - [WorldClock downloads](WorldClock/dist/)
 - [CraftFromStorage downloads](CraftFromStorage/dist/)
+- [BuildFromStorage downloads](BuildFromStorage/dist/)
 - [CookFromStorage downloads](CookFromStorage/dist/)
 - [SupplyFromStorage downloads](SupplyFromStorage/dist/)
 
