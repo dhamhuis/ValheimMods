@@ -80,4 +80,6 @@ Each `{time}` reserves space based on the widest time in a day using its configu
 
 WorldClock is a client-side HUD display and can be used alongside [AutoRepair](https://github.com/dhamhuis/ValheimMods/tree/main/AutoRepair), [CraftFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CraftFromStorage), [CookFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CookFromStorage) and [SupplyFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/SupplyFromStorage).
 
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
 [Project and support](https://github.com/dhamhuis/ValheimMods)

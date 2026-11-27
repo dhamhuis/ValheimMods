@@ -50,4 +50,6 @@ Install on each player's client; no server installation is required. When using 
 - [SupplyFromStorage](https://thunderstore.io/c/valheim/p/Hoose/SupplyFromStorage/) supplies fuel and machine processing inputs.
 - [AutoRepair](https://thunderstore.io/c/valheim/p/Hoose/AutoRepair/) repairs equipment at crafting stations.
 
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
 [Project and support](https://github.com/dhamhuis/ValheimMods)

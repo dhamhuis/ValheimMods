@@ -73,4 +73,6 @@ The F8 menu requires both `Input selection/Enabled` and `Automation/Automatic pr
 
 Works well with [CookFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CookFromStorage) (cooking ingredients and Fermenter bases), [CraftFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CraftFromStorage) (craft and upgrade from nearby chests) and [AutoRepair](https://github.com/dhamhuis/ValheimMods/tree/main/AutoRepair) (repairs your gear when you use a station). SupplyFromStorage feeds the fire; CookFromStorage loads the food. Every storage mod uses the same 20 m default radius, and each can be set separately.
 
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
 [Project and support](https://github.com/dhamhuis/ValheimMods)

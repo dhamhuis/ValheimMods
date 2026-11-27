@@ -35,4 +35,6 @@ BuildFromStorage runs on each player's client; a server installation is not requ
 
 BuildFromStorage complements [CraftFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CraftFromStorage) for station recipes, [CookFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CookFromStorage) for food recipes and cooking stations, [SupplyFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/SupplyFromStorage) for fuel and machine inputs, and [AutoRepair](https://github.com/dhamhuis/ValheimMods/tree/main/AutoRepair) for gear repairs.
 
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
 [Project and support](https://github.com/dhamhuis/ValheimMods)

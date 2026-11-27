@@ -40,4 +40,6 @@ None needed. AutoRepair works as soon as it is installed.
 
 Works well with [CraftFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CraftFromStorage) (craft and upgrade from nearby chests), [CookFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CookFromStorage) (cooking and brewing from storage) and [SupplyFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/SupplyFromStorage) (fuel and machine inputs from storage). Walk up to and use the Forge: your gear is repaired, and the upgrade materials come straight from your chests.
 
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
 [Project and support](https://github.com/dhamhuis/ValheimMods)

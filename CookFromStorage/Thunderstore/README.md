@@ -68,4 +68,6 @@ The picker also works without SupplyFromStorage. Disabling input selection resto
 
 Works well with [SupplyFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/SupplyFromStorage) (keeps your cooking fires, oven and machines fueled from storage), [CraftFromStorage](https://github.com/dhamhuis/ValheimMods/tree/main/CraftFromStorage) (non-food recipes and equipment upgrades) and [AutoRepair](https://github.com/dhamhuis/ValheimMods/tree/main/AutoRepair) (repairs your gear when you use a station). CookFromStorage and CraftFromStorage share one recipe engine, so ingredients are never counted or consumed twice. Every storage mod uses the same 20 m default radius, and each can be set separately.
 
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
 [Project and support](https://github.com/dhamhuis/ValheimMods)
