@@ -4,6 +4,8 @@ Use this file for repeatable manual tests and results instead of chat-only instr
 
 On 2026-11-20 the user reported, "In game testing is now complete." This is overall user-reported acceptance; individual D and H checklist results were not recorded here, so their unchecked boxes are retained.
 
+On 2026-11-09 the user also passed the non-consuming preview's initial opening, icons/counts/highlighting and Escape/control-restoration checks. That preview result did not establish selected-type insertion, broader input, controller or UI-scale behavior.
+
 ## Recorded run
 
 - Date: 2026-11-09.

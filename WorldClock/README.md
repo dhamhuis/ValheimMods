@@ -1,6 +1,6 @@
 # WorldClock
 
-WorldClock displays Valheim's current in-game time in a configurable on-screen label. Its rich-text template supports time, world day and fixed day-phase placeholders, plus per-part font name, size and color; it also supports adjustable position and a font demo.
+Keep an eye on the time without opening a menu. WorldClock displays Valheim's current in-game time in a configurable on-screen label. Its rich-text template supports time, world day and fixed day-phase placeholders, plus per-part font name, size and color; it also supports adjustable position and a font demo.
 
 The implementation reads the public `EnvMan.GetDayFraction()` and `EnvMan.GetDay()` APIs, formats the values locally, and draws through Unity's immediate-mode GUI. It does not patch game methods, read private game state, require a server-side install or depend on `ValheimMods.Common`.
 
@@ -15,3 +15,7 @@ dotnet run --project .\WorldClock\tests\WorldClock.Tests.csproj --configuration 
 ```
 
 See the [Thunderstore README](Thunderstore/README.md) for user configuration and installation.
+
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
+[Project and support](https://github.com/dhamhuis/ValheimMods)

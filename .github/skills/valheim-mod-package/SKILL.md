@@ -33,7 +33,19 @@ Keep browser IDs, authentication state, current commit hashes and release-specif
 
 ## Thunderstore README
 
-The package README is the player-facing page. Do not mention testing status. Keep separate `Installation` (starting with "Install with r2modman or the Thunderstore Mod Manager.") and `Configuration` sections, and include a `Stack with other mods` section linking the repository's companion mods.
+The package README is the player-facing page. Follow the [player-facing documentation guidance](../../../AGENTS.md#player-facing-documentation): lead with the player benefit in an energetic, mildly promotional voice, but do not exaggerate features or compatibility. Describe the mod's usage, important limits and upgrade requirements clearly; do not mention development or testing status.
+
+Keep separate `Installation` (starting with "Install with r2modman or the Thunderstore Mod Manager.") and `Configuration` sections, and include a `Stack with other mods` section linking the repository's companion mods. End with the following footer:
+
+```markdown
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
+[Project and support](https://github.com/dhamhuis/ValheimMods)
+```
+
+## Changelog
+
+Keep versions newest first and entries concise and player-focused: features, fixes, meaningful behavior changes and required upgrade or compatibility steps. Omit development, test and implementation details unless needed to explain a player-visible change. Keep existing version history and do not claim unverified behavior.
 
 ## Install for Local Testing
 

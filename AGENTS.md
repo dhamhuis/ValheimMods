@@ -17,6 +17,12 @@ Apply these rules to all maintained C# source and tests. Preserve behavior when 
 - Preserve binary files and generated artifacts; do not rebuild distributions just to change file endings.
 - Follow the root `.editorconfig` setting `insert_final_newline = false`. This overrides the usual final-newline convention, including SA1518 guidance below.
 
+## Player-facing documentation
+
+- Treat the repository mod index, mod READMEs, Thunderstore READMEs and changelogs as player-facing. Do not describe mods or features there as in development, experimental, awaiting testing or requiring validation. Keep testing checklists, results and verification limits in developer-focused documents; do not invent or overstate compatibility, testing or release status.
+- Lead with what the mod does for players in a lively, mildly promotional voice. Keep usage, installation, configuration, limitations and compatibility clear and accurate; preserve important warnings and upgrade instructions.
+- Include the repository link and the standard Ko-fi support line in each mod README. See the [packaging skill](.github/skills/valheim-mod-package/SKILL.md) for the exact package footer and changelog guidance.
+
 ## C# layout
 
 - Use file-scoped namespaces, one namespace per file. Test doubles for Valheim's global-namespace API must remain global; keep those in separate files.

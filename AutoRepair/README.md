@@ -1,6 +1,6 @@
 # AutoRepair
 
-AutoRepair by Hoose repairs eligible equipment in the local player's inventory when they interact with a crafting station. It uses Valheim's normal repair methods rather than changing item durability directly.
+Get back to adventuring with repaired gear and no repeated repair-button clicks. AutoRepair by Hoose repairs eligible equipment in the local player's inventory when they interact with a crafting station, using Valheim's normal repair methods.
 
 The [Thunderstore README](Thunderstore/README.md) is the player-facing page included in the release package. This README describes the mod's behavior and implementation.
 
@@ -45,3 +45,7 @@ The test project separates `Integration/` and `TestDoubles/` and uses the indepe
 Each interaction scenario has its own named method, fresh fixture and short XML summary. The shared runner prints scenario names, identifies failing tests and reports test/assertion totals.
 
 Release notes are maintained in [CHANGELOG.md](CHANGELOG.md).
+
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
+[Project and support](https://github.com/dhamhuis/ValheimMods)

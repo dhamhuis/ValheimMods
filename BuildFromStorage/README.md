@@ -1,6 +1,6 @@
 # BuildFromStorage
 
-Build with the Hammer using materials from nearby storage.
+Build with the Hammer using materials straight from nearby storage. Leave the chest-to-build-site shuffle behind.
 
 BuildFromStorage adds eligible nearby storage to vanilla build-cost checks and consumes materials from your inventory first, then the nearest storage that supplies the remaining amount. Vanilla placement rules, building-station requirements, permissions and no-cost modes remain in effect.
 
@@ -21,7 +21,7 @@ BuildFromStorage adds eligible nearby storage to vanilla build-cost checks and c
 
 Install with r2modman or the Thunderstore Mod Manager. Requires **BepInExPack_Valheim**, which the mod manager installs for you.
 
-For manual installation, copy `plugins/BuildFromStorage/` into `BepInEx/plugins/BuildFromStorage/`. Keep `BuildFromStorage.dll` and `ValheimMods.Common.dll` together in that folder.
+For manual installation, copy the contents of `plugins/` into `BepInEx/plugins/BuildFromStorage/`. Keep `BuildFromStorage.dll` and `ValheimMods.Common.dll` together in that folder.
 
 BuildFromStorage runs on each player's client; a server installation is not required.
 
@@ -31,16 +31,10 @@ BuildFromStorage runs on each player's client; a server installation is not requ
 
 - `Storage/Storage radius` (default `20`, range `1`-`100` meters): how far around the player storage is searched.
 
-## Validation
+## Companion compatibility
 
-BuildFromStorage is an original implementation following the repository's shared BepInEx build and storage conventions. The user reported single-player testing complete on 2026-11-24; see the checklist for the recorded steps. Multiplayer ownership and concurrency remain untested.
+[FarmFromStorage](../FarmFromStorage/README.md) handles Cultivator costs separately, with its own radius setting. When using both mods, update BuildFromStorage and keep every installed `ValheimMods.Common.dll` copy identical and current. FarmFromStorage rejects older BuildFromStorage versions that could cause duplicate consumption.
 
-See the [in-game test checklist](TESTING.md) for step-by-step validation.
-
-### Shared placement engine
-
-The current development build shares one tool-routed placement engine with [FarmFromStorage](../FarmFromStorage/README.md). Hammer and Cultivator costs are handled independently, including separate radius settings. The prior single-player report predates this migration; repeat the applicable Hammer checklist before packaging.
-
-If using both mods, install the current development BuildFromStorage DLL, not its old prepared ZIP, and keep every installed `ValheimMods.Common.dll` copy identical and current. FarmFromStorage rejects the older standalone BuildFromStorage patch set to prevent duplicate consumption.
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
 
 [Project and support](https://github.com/dhamhuis/ValheimMods)

@@ -1,6 +1,6 @@
 # FarmFromStorage
 
-Plant with the Cultivator using materials from nearby storage.
+Plant your fields with the Cultivator using materials straight from nearby storage. Leave the seeds in your chests, not your pockets.
 
 Every plantable piece available in your Cultivator menu uses its normal resource requirements: crop seeds, crops planted for seed production, saplings, and other plantable entries are not restricted to a hardcoded item list. Your inventory supplies costs first, then the nearest eligible storage supplies the remainder. Materials are removed only after successful placement.
 
@@ -18,7 +18,7 @@ Every plantable piece available in your Cultivator menu uses its normal resource
 
 Install with r2modman or the Thunderstore Mod Manager. Requires **BepInExPack_Valheim**.
 
-For this development build, copy `dist/FarmFromStorage.dll` and `dist/ValheimMods.Common.dll` together into `BepInEx/plugins/FarmFromStorage/` in a test profile. Do not install a second copy of the same plugin.
+For manual installation, copy `plugins/FarmFromStorage.dll` and `plugins/ValheimMods.Common.dll` from the archive into `BepInEx/plugins/FarmFromStorage/`. Keep both DLLs together and do not install a second copy of the plugin.
 
 FarmFromStorage runs on each player's client; a server installation is not required.
 
@@ -26,7 +26,7 @@ FarmFromStorage runs on each player's client; a server installation is not requi
 
 FarmFromStorage and the updated BuildFromStorage register disjoint Cultivator and Hammer clients in one shared placement engine. Each keeps its own radius. Install the current BuildFromStorage DLL if using both, and replace **every installed copy** of `ValheimMods.Common.dll` with the same current build, including copies beside CraftFromStorage, CookFromStorage and SupplyFromStorage.
 
-FarmFromStorage loads after BuildFromStorage when it is present. Older BuildFromStorage builds with their own placement patches are explicitly rejected with an update error, rather than risking duplicate counts or consumption. The old prepared BuildFromStorage ZIP is not the updated development build.
+FarmFromStorage loads after BuildFromStorage when it is present. Older BuildFromStorage builds with their own placement patches are explicitly rejected with an update error, rather than risking duplicate counts or consumption.
 
 ## Configuration
 
@@ -44,8 +44,8 @@ dotnet run --project .\BuildFromStorage\tests\BuildFromStorage.Tests.csproj --co
 .\scripts\Render-ModIcon.ps1 -ModDirectory .\FarmFromStorage
 ```
 
-The production-linked tests use game stubs; the installed assembly was inspected for tool selection and placement-cost ordering. Neither establishes live planting, menu behavior, multiplayer safety, or persistence. All in-game tests remain pending in [TESTING.md](TESTING.md). The shared-engine migration also needs a fresh Hammer regression pass.
+See the [development guide](../docs/Development.md), [testing checklist](TESTING.md) and [placement API reference](../docs/reference/Building.md).
 
-Prepared test DLLs are under `dist/`. Packaging and publication are deferred until in-game validation is satisfactory; then run `.\FarmFromStorage\scripts\pack.ps1`. See the [development guide](../docs/Development.md) and [placement API reference](../docs/reference/Building.md).
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
 
 [Project and support](https://github.com/dhamhuis/ValheimMods)

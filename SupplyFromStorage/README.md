@@ -1,6 +1,6 @@
 # SupplyFromStorage
 
-SupplyFromStorage by Hoose adds one accepted fuel or processing input from nearby accessible storage when you use a machine's default E interaction. It is a separate BepInEx plugin from CraftFromStorage.
+Feed your fires and machines without hauling supplies out of chests. SupplyFromStorage by Hoose adds one accepted fuel or processing input from nearby accessible storage when you use a machine's default E interaction. It is a separate BepInEx plugin from CraftFromStorage.
 
 ## Supported machines
 
@@ -21,7 +21,7 @@ Fireplace and fuel-switch requests check storage before vanilla reports missing 
 
 A full fire reports that no more fuel can be added when accessible storage has its fuel, even if your inventory is empty. No storage fuel is consumed; if neither inventory nor accessible storage has fuel, vanilla's missing-fuel message remains.
 
-For safety, SupplyFromStorage transfers only when the local client owns both the source container and the machine. It does not request ownership, open containers, or modify remote-owned inventories. As a result, storage owned by another player is skipped until normal gameplay gives the local client ownership. Multiplayer behavior, including ownership changes and simultaneous access, still requires in-game testing.
+For safety, SupplyFromStorage transfers only when the local client owns both the source container and the machine. It does not request ownership, open containers, or modify remote-owned inventories. As a result, storage owned by another player is skipped until normal gameplay gives the local client ownership.
 
 CraftFromStorage and SupplyFromStorage have separate plugins and do not share transfer hooks. CraftFromStorage patches recipe checks and string-based inventory consumption; SupplyFromStorage patches only the machine's E-action callbacks, and supplies from storage only if vanilla did not already handle that action from player inventory. It removes a specific item from its source container and invokes the machine's vanilla fuel/input RPC only when the local client owns it. These distinct hooks avoid double insertion through CraftFromStorage's crafting hooks. Disable other mods that automate the same machine inputs.
 
@@ -40,9 +40,9 @@ Configuration is in `BepInEx/config/hoose.valheim.supplyfromstorage.cfg`:
 
 Each setting's description in the config file lists the machines and items it controls.
 
-## Experimental processing-input selection
+## Processing-input selection
 
-Selection is **enabled by default for new configs** and covers the **Charcoal Kiln, Smelter, Blast Furnace and Battering Ram engine**. Saved disabled settings are not overridden; upgrading from the earlier opt-in milestone may require setting `Input selection/Enabled = true`. Separate fuel callbacks remain unchanged. The kiln core/regression, furnace behavior and BR.1-BR.82 ram scenarios passed by user report. The post-checklist localized item-name message correction was confirmed by the user. Multiplayer, controllers and broader edge cases remain unverified. Keep `Automation/Automatic processing inputs` enabled. The old preview setting alone still cannot change E behavior.
+Selection is **enabled by default for new configs** and covers the **Charcoal Kiln, Smelter, Blast Furnace and Battering Ram engine**. Saved disabled settings are not overridden; upgrading from the earlier opt-in version may require setting `Input selection/Enabled = true`. Separate fuel callbacks remain unchanged. Keep `Automation/Automatic processing inputs` enabled. The preview setting alone cannot change E behavior.
 
 - Aim at a supported station's material input (not coal/fuel), or the ram's engine-loading input at the back (not its operating interaction), and press **F8** (`Input selection preview/Open key`). Click a tile or use Left/Right / D-pad, then **Use highlighted**, Enter or controller Use to arm that exact type. Choosing consumes nothing; subsequent E actions insert one item each.
 - F8 shows only inputs discovered by the current character, including discovered types with zero available items. Unknown types have no tiles, placeholders or hidden-item count. New discoveries appear on refresh. Auto also skips undiscovered inputs in inventory and storage; unknown-only availability blocks insertion instead of falling back to vanilla. Normal explicit item-use remains unchanged.
@@ -66,7 +66,7 @@ Fresh automatic priorities, from first to last (no default exclusions):
 
 Display order matches default priority except for the Smelter, whose tiles remain Copper Ore, Tin Ore, Iron Ore, Silver Ore, Copper Scrap, Scrap Bronze, Scrap Iron. Only discovered inputs appear, including additional accepted runtime inputs after the built-in types; their automatic priority follows configured types in ordinal prefab-ID order.
 
-Use the [Markdown testing checklist](TESTING.md) to check off individual steps and resume later. It preserves prior kiln/furnace/ram results. All vanilla inputs fit on one page. The inspected Blast Furnace has three distinct input types, including current Flametal ore (`FlametalOreNew`) and Petrified Tissue (`GoldOre`). The ram's engine consumes loaded wood as fuel without producing an item, so compare source counts rather than expecting refined output. Use small stacks and a backed-up world/character for repeat runs. The prepared release ZIP is in `dist/`.
+All vanilla inputs fit on one page. The Blast Furnace accepts Flametal ore and Petrified Tissue among its inputs. The ram's engine consumes loaded wood as fuel without producing an item.
 
 ### Non-consuming preview
 
@@ -76,13 +76,7 @@ With `Input selection/Enabled` disabled, the original **non-consuming Charcoal K
 - The grid displays discovered kiln inputs with separate inventory and eligible-storage counts. Discovered unavailable types remain visible but disabled. Counts and discovery filtering refresh four times per second while open. This preview-only mode does not restrict legacy E insertion.
 - Click an available type or use keyboard Left/Right or controller D-pad Left/Right to highlight it. Close with Escape, controller B/Menu, F8 or the Close button.
 - Movement/look and normal player interactions are blocked while open. After closing, held use/attack/cancel controls must be released before gameplay input resumes.
-- The prototype requires local ownership of the kiln and counted containers, normal storage access and the configured storage radius. It closes when the target becomes invalid or the local player dies, teleports or disconnects. Keyboard opening is supported; controller opening and final native-game styling remain future work.
-
-The user passed the initial opening, icons/counts/highlighting and Escape/control-restoration checks on 2026-11-09. This was the non-consuming preview, not selected-type insertion. Broader input, controller and UI-scale checks remain necessary; builds and helper tests cannot certify live UI behavior.
-
-This is a local preview, not a published or in-game-certified release. Stub tests and a successful build do not prove live-game networking or persistence.
-
-The discovery filter is a subsequent change to the previously passed selection milestone. Its automated checks pass, but the separate [discovery checkpoint](TESTING.md#discovery-filter-checkpoint---pending) still requires in-game testing.
+- The preview requires local ownership of the kiln and counted containers, normal storage access and the configured storage radius. It closes when the target becomes invalid or the local player dies, teleports or disconnects. Open it using the configured keyboard key.
 
 ## Development
 
@@ -92,6 +86,8 @@ The discovery filter is a subsequent change to the previously passed selection m
 dotnet run --project .\SupplyFromStorage\tests\SupplyFromStorage.Tests.csproj --configuration Release
 ```
 
-See the [repository development guide](../docs/Development.md) for build prerequisites, package layout and validation limits.
+See the [repository development guide](../docs/Development.md) and [testing checklist](TESTING.md) for build prerequisites, package layout and validation records.
 
-[Source and support](https://github.com/dhamhuis/ValheimMods)
+If you enjoy these mods and would ever like to support my work, [I'm on Ko-fi](https://ko-fi.com/hoose_builds). Thanks for using them!
+
+[Project and support](https://github.com/dhamhuis/ValheimMods)

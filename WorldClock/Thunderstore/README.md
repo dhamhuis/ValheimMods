@@ -1,6 +1,6 @@
 # WorldClock
 
-See the time in Valheim without opening a menu. WorldClock displays the current in-game time as a small, configurable HUD label.
+Keep an eye on the time without opening a menu. WorldClock displays Valheim's current in-game time as a small, configurable HUD label.
 
 ## Features
 

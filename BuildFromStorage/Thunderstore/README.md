@@ -1,6 +1,6 @@
 # BuildFromStorage
 
-Build with the Hammer using materials from nearby storage.
+Build with the Hammer using materials straight from nearby storage. Leave the chest-to-build-site shuffle behind.
 
 BuildFromStorage adds eligible nearby storage to vanilla build-cost checks and consumes materials from your inventory first, then the nearest storage that supplies the remaining amount. Vanilla placement rules, building-station requirements, permissions and no-cost modes remain in effect.
 

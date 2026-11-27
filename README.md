@@ -1,6 +1,6 @@
 # ValheimMods
 
-Valheim mods by Hoose, developed as focused BepInEx plugins.
+Valheim mods by Hoose: focused BepInEx plugins that make everyday adventures a little smoother.
 
 ## Mods
 
@@ -30,7 +30,7 @@ Each mod's `dist/` folder is included in version control so its prepared DLL and
 - [CookFromStorage downloads](CookFromStorage/dist/)
 - [SupplyFromStorage downloads](SupplyFromStorage/dist/)
 
-Install with BepInExPack_Valheim using the mod's installation instructions. Mods that use shared runtime helpers include `ValheimMods.Common.dll` alongside their plugin. Distribution files represent the last prepared build, not necessarily every subsequent source or artwork edit. In-game and multiplayer validation is still required.
+Install with BepInExPack_Valheim using the mod's installation instructions. Mods that use shared runtime helpers include `ValheimMods.Common.dll` alongside their plugin. Distribution files represent the last prepared build, not necessarily every subsequent source or artwork edit.
 
 ## Development
 

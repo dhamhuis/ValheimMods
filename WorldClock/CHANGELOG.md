@@ -7,4 +7,3 @@
 - Support named fonts, font sizes, colors, opacity, bold styling and a subtle shadow.
 - Include a scrollable sampler of currently loaded fonts.
 - Reserve a stable width for time values to reduce shifting as digits change.
-- Use the public Valheim day-fraction API without Harmony patches or private-field reflection.
