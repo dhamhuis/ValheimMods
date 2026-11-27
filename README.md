@@ -26,7 +26,7 @@ Each mod's `dist/` folder is included in version control so its prepared DLL and
 - [WorldClock downloads](WorldClock/dist/)
 - [CraftFromStorage downloads](CraftFromStorage/dist/)
 - [BuildFromStorage downloads](BuildFromStorage/dist/)
-- [FarmFromStorage development DLLs](FarmFromStorage/dist/) (in-game validation and ZIP packaging pending)
+- [FarmFromStorage downloads](FarmFromStorage/dist/)
 - [CookFromStorage downloads](CookFromStorage/dist/)
 - [SupplyFromStorage downloads](SupplyFromStorage/dist/)
 
