@@ -9,7 +9,6 @@ See the time in Valheim without opening a menu. WorldClock displays the current 
 - Style individual parts with bold, font size and hex colors. The default is bold Norsebold text with a subtle shadow.
 - Select loaded Unity fonts by name and enable a scrollable, column-aligned font sampler.
 - Position the clock with screen-width and screen-height fractions.
-- Disable the mod if you do not want the clock displayed.
 - The clock is local to your client; servers do not need to install it.
 
 ## Installation
