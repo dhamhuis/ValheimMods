@@ -21,7 +21,7 @@ public sealed class CookFromStoragePlugin : BaseUnityPlugin
     public const string PluginName = "CookFromStorage";
     public const string PluginAuthor = "Hoose";
     public const string PluginGuid = "hoose.valheim.cookfromstorage";
-    public const string PluginVersion = "1.0.1";
+    public const string PluginVersion = "1.0.2";
 
     private const string StorageRadiusDescription =
         "How far, in meters, CookFromStorage searches for storage around you (a sphere centred on your character). Allowed range: 1 to 100.\n"

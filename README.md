@@ -10,6 +10,7 @@ Valheim mods by Hoose, developed as focused BepInEx plugins.
 | [WorldClock](WorldClock/README.md) | Displays configurable Valheim world time in a local HUD label. |
 | [CraftFromStorage](CraftFromStorage/README.md) | Crafts and upgrades at non-food stations using accessible storage near the player (20 m by default, configurable). |
 | [BuildFromStorage](BuildFromStorage/README.md) | Builds with the Hammer using accessible nearby storage (20 m by default, configurable). |
+| [FarmFromStorage](FarmFromStorage/README.md) | Plants Cultivator crops and saplings using accessible nearby storage (20 m by default, configurable). |
 | [CookFromStorage](CookFromStorage/README.md) | Prepares food-station recipes and supplies cooking racks/ovens and Fermenters from nearby accessible storage. |
 | [SupplyFromStorage](SupplyFromStorage/README.md) | Supplies one accepted fuel or processing input from nearby accessible storage per machine E interaction. |
 
@@ -25,6 +26,7 @@ Each mod's `dist/` folder is included in version control so its prepared DLL and
 - [WorldClock downloads](WorldClock/dist/)
 - [CraftFromStorage downloads](CraftFromStorage/dist/)
 - [BuildFromStorage downloads](BuildFromStorage/dist/)
+- [FarmFromStorage development DLLs](FarmFromStorage/dist/) (in-game validation and ZIP packaging pending)
 - [CookFromStorage downloads](CookFromStorage/dist/)
 - [SupplyFromStorage downloads](SupplyFromStorage/dist/)
 

@@ -118,9 +118,21 @@ Local reservations are not a proven network-wide lock; perform this test only wi
 - [x] Repeat tests 2-5. Confirm Hammer costs are consumed exactly once, with the expected inventory-first and nearest-first behavior.
 - [x] Craft a normal station recipe and use a processing machine with the relevant companion mods. Confirm they retain their expected behavior and do not consume materials twice.
 
+## 15. Requirement counts
+
+- [ ] Follow the [requirement count steps](../FarmFromStorage/TESTING.md#18-requirement-counts-all-storage-mods) for the Hammer: with wood in inventory and nearby storage, confirm the build tooltip shows the required amount raised one line with `inventory:storage` on a yellow line in its normal place, and that a long material name such as Black Metal stays on one line without being overlapped. Confirm a side with none is left blank, that with none anywhere only the vanilla amount is shown, and that the amount flashes red only when inventory and storage together are short.
 ## Results
 
 - [ ] Record any failed test number, game and mod versions, single-player or server, chest distances, and initial/final counts.
 - [ ] Save screenshots and relevant `BepInEx\LogOutput.log` entries for failures.
 - [ ] Restore the radius and any profile/world settings changed for testing.
 - [ ] Report the results, including tests not performed and any unexpected ownership, persistence, or multiplayer behavior.
+
+## Shared placement engine regression - pending
+
+The earlier checked results apply to the standalone implementation, not the later shared Hammer/Cultivator placement engine.
+
+- [ ] Install the current development BuildFromStorage DLL and identical current common DLLs beside all companion plugins.
+- [ ] Repeat tests 1-10 above against this build, recording fresh results without treating the older checked boxes as new evidence.
+- [ ] Enable FarmFromStorage and follow its [companion compatibility steps](../FarmFromStorage/TESTING.md#13-updated-buildfromstorage-compatibility), including independent radii and tool switching.
+- [ ] Repeat applicable multiplayer tests and record all untested scenarios before packaging.

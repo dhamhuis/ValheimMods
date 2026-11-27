@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="..\..\ValheimMods.Common\src\ContainerRegistry.cs" Link="Production\ContainerRegistry.cs" />
     <Compile Include="..\..\ValheimMods.Common\src\StorageRange.cs" Link="Production\StorageRange.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\RequirementAmountText.cs" Link="Production\RequirementAmountText.cs" />
     <Compile Include="..\..\ValheimMods.Common\src\Crafting\*.cs" Link="Production\Crafting\%(Filename)%(Extension)" />
     <Compile Include="..\..\ValheimMods.Common\src\InputSelection\InputPreviewItem.cs" Link="Production\InputPreviewItem.cs" />
     <Compile Include="..\..\ValheimMods.Common\src\InputSelection\InputPreviewSnapshot.cs" Link="Production\InputPreviewSnapshot.cs" />

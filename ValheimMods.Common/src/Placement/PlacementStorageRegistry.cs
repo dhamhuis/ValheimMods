@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using ValheimMods.Common;
 using UnityEngine;
 
-namespace BuildFromStorage;
+namespace ValheimMods.Common.Placement;
 
-internal sealed class BuildStorageRegistry
+internal sealed class PlacementStorageRegistry
 {
     private readonly ContainerRegistry _registry = new();
     private List<Container> _cached;

@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using HarmonyLib;
+using TMPro;
 using UnityEngine;
+using ValheimMods.Common;
 using ValheimMods.Common.Crafting;
 using ValheimMods.Testing;
 using static CookFromStorage.Tests.CookTestSetup;
@@ -216,8 +218,14 @@ internal static class RecipeIntegrationTests
         using var host = new RecipeHost(true);
         var (player, chest, recipe, gui) = Setup(stationName);
         check(player.HaveRequirementItems(recipe, false, 1, 1), "Food recipe availability ignored storage.");
-        check(InventoryGui.SetupRequirement(new Transform(), recipe.m_resources[0], player, true, 1, 1),
-            "Food recipe display ignored storage.");
+        var amount = new TMP_Text();
+        var element = new Transform();
+        element.AddChild("res_amount", amount);
+        InventoryGui.SetupRequirement(element, recipe.m_resources[0], player, true, 1, 1);
+        check(InventoryGui.LastRequirementMet, "Food recipe display ignored storage.");
+        check(
+            amount.text == "2" && RequirementAmountText.FindLabel(element)?.text == ":4",
+            $"Food recipe display text was '{amount.text}'.");
         check(player.Inventory.CountItems("$item_raw_meat", -1, true) == 0 && CraftingContext.Current == null,
             "Food recipe preview leaked storage counts into ordinary inventory.");
         gui.DoCrafting(player);

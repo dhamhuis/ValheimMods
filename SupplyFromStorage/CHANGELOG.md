@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+
+- Ship the updated shared `ValheimMods.Common.dll` used by all current storage mods. Update every storage mod together so each folder has the same copy. No SupplyFromStorage behavior changes.
+
 ## 1.0.2
 
 - Take control of what goes into your stations with the F8 input menu: choose an exact item or set automatic priorities and exclusions. For example, turn Wood into charcoal while keeping Finewood and Corewood out of automatic kiln input.

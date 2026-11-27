@@ -1,14 +1,14 @@
 using HarmonyLib;
 
-namespace BuildFromStorage;
+namespace ValheimMods.Common.Placement;
 
 [HarmonyPatch(typeof(Player), nameof(Player.TryPlacePiece), typeof(Piece))]
-internal static class BuildCostPlanPatch
+internal static class PlacementCostPlanPatch
 {
     [HarmonyPrefix]
     private static bool BeforePlacePiece(Player __instance, Piece piece, ref bool __result)
     {
-        var context = BuildStorageContext.Current;
+        var context = PlacementStorageContext.Current;
 
         if (context == null || context.Player != __instance || piece == null
             || __instance.PlacementCostDisabled
@@ -17,11 +17,11 @@ internal static class BuildCostPlanPatch
             return true;
         }
 
-        var plan = BuildResourcePlan.Create(context, piece.m_resources, 0, -1, 1);
+        var plan = PlacementResourcePlan.Create(context, piece.m_resources, 0, -1, 1);
 
         if (plan == null)
         {
-            BuildFromStoragePlugin.LogWarning("Build resources changed before placement; the piece was not placed.");
+            context.Client.LogWarning("Placement resources changed before placement; the piece was not placed.");
             __result = false;
 
             return false;
@@ -34,7 +34,7 @@ internal static class BuildCostPlanPatch
 
         if (!context.TryReserve(plan))
         {
-            BuildFromStoragePlugin.LogWarning("Nearby storage became unavailable before placement; the piece was not placed.");
+            context.Client.LogWarning("Nearby storage became unavailable before placement; the piece was not placed.");
             __result = false;
 
             return false;

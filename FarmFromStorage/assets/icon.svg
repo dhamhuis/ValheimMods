@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>FarmFromStorage</title>
+  <desc>Original seedling and companion storage chest surrounded by receding rows of small crops inside the shared carved wood frame.</desc>
+  <defs>
+    <linearGradient id="farmChest" x2="0" y2="1">
+      <stop stop-color="#a37646"/>
+      <stop offset="1" stop-color="#483021"/>
+    </linearGradient>
+    <linearGradient id="farmGold">
+      <stop stop-color="#f3d396"/>
+      <stop offset="1" stop-color="#b17639"/>
+    </linearGradient>
+    <g id="farmSprout">
+      <path d="M0 2 L0 -9" fill="none" stroke="#a9ca7d" stroke-width="2" stroke-linecap="round"/>
+      <path d="M0 -5 Q-10 -4 -12 -15 Q-1 -15 0 -5Z" fill="#6eab54" stroke="#b8d784" stroke-width="1.5"/>
+      <path d="M0 -8 Q10 -7 13 -19 Q2 -19 0 -8Z" fill="#82b660" stroke="#b8d784" stroke-width="1.5"/>
+    </g>
+  </defs>
+  <image href="../../assets/icons/valheim-panel.svg" width="512" height="512"/>
+  <path d="M48 178 Q128 156 208 178 L208 204 L48 204Z" fill="#644229" transform="scale(2)"/>
+  <g opacity="0.9">
+    <use href="#farmSprout" transform="translate(108 394) scale(0.9)"/>
+    <use href="#farmSprout" transform="translate(124 372) scale(0.72)"/>
+    <use href="#farmSprout" transform="translate(140 357) scale(0.55)"/>
+    <use href="#farmSprout" transform="translate(154 349) scale(0.4)"/>
+    <use href="#farmSprout" transform="translate(166 344) scale(0.28)"/>
+    <use href="#farmSprout" transform="translate(148 398) scale(0.9)"/>
+    <use href="#farmSprout" transform="translate(404 394) scale(0.9)"/>
+    <use href="#farmSprout" transform="translate(388 372) scale(0.72)"/>
+    <use href="#farmSprout" transform="translate(372 357) scale(0.55)"/>
+    <use href="#farmSprout" transform="translate(358 349) scale(0.4)"/>
+    <use href="#farmSprout" transform="translate(346 344) scale(0.28)"/>
+    <use href="#farmSprout" transform="translate(364 398) scale(0.9)"/>
+  </g>
+  <g transform="scale(2)">
+    <path d="M127 158 Q125 108 135 77" fill="none" stroke="#c9e69b" stroke-width="9" stroke-linecap="round"/>
+    <path d="M127 117 Q84 122 77 75 Q119 73 127 117Z" fill="#6eab54" stroke="#d1e9a1" stroke-width="3"/>
+    <path d="M130 101 Q170 104 181 60 Q139 61 130 101Z" fill="#82b660" stroke="#d1e9a1" stroke-width="3"/>
+  </g>
+  <g transform="translate(-4 -34) scale(1.25)" stroke="#17110d" stroke-width="9" stroke-linejoin="round">
+    <path d="M133 249 L273 249 L283 282 L283 352 L133 352 Z" fill="url(#farmChest)"/>
+    <path d="M133 249 Q203 214 273 249 L283 282 L133 282 Z" fill="url(#farmChest)"/>
+    <path d="M158 248 L158 352 M254 245 L254 352 M133 282 L283 282" fill="none" stroke="#9b9b81" stroke-width="12"/>
+    <rect x="195" y="276" width="28" height="33" rx="3" fill="url(#farmGold)"/>
+  </g>
+  <image href="../../assets/icons/valheim-wood-frame.svg" width="512" height="512"/>
+</svg>

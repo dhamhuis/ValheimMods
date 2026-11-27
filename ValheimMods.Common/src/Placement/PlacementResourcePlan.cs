@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace BuildFromStorage;
+namespace ValheimMods.Common.Placement;
 
-internal sealed class BuildResourcePlan
+internal sealed class PlacementResourcePlan
 {
     private readonly List<StoragePortion> _storagePortions = new();
     private bool _consumed;
@@ -26,8 +26,8 @@ internal sealed class BuildResourcePlan
         }
     }
 
-    internal static BuildResourcePlan Create(
-        BuildStorageContext.Scope context,
+    internal static PlacementResourcePlan Create(
+        PlacementStorageContext.Scope context,
         Piece.Requirement[] requirements,
         int qualityLevel,
         int itemQuality,
@@ -38,7 +38,7 @@ internal sealed class BuildResourcePlan
             return null;
         }
 
-        var plan = new BuildResourcePlan();
+        var plan = new PlacementResourcePlan();
         var allocated = new Dictionary<Inventory, Dictionary<string, int>>();
         var playerInventory = context.Player.GetInventory();
         var station = context.Player.GetCurrentCraftingStation();
@@ -136,7 +136,7 @@ internal sealed class BuildResourcePlan
         return plan;
     }
 
-    internal bool ValidateStorage(BuildStorageContext.Scope context)
+    internal bool ValidateStorage(PlacementStorageContext.Scope context)
     {
         var allocated = new Dictionary<Inventory, Dictionary<string, int>>();
 
@@ -166,7 +166,7 @@ internal sealed class BuildResourcePlan
         return true;
     }
 
-    internal void ConsumeStorage(BuildStorageContext.Scope context)
+    internal void ConsumeStorage(PlacementStorageContext.Scope context)
     {
         if (!UsesStorage || _consumed)
         {
@@ -175,8 +175,8 @@ internal sealed class BuildResourcePlan
 
         if (!ValidateStorage(context))
         {
-            const string message = "Build storage changed before resource consumption; the placed piece may need manual correction.";
-            BuildFromStoragePlugin.LogError(message);
+            const string message = "Placement storage changed before resource consumption; the placed piece may need manual correction.";
+            context.Client.LogError(message);
 
             throw new InvalidOperationException(message);
         }
@@ -189,8 +189,8 @@ internal sealed class BuildResourcePlan
 
             if (before - after != portion.Amount)
             {
-                const string message = "Build storage did not consume the planned resource amount.";
-                BuildFromStoragePlugin.LogError(message);
+                const string message = "Placement storage did not consume the planned resource amount.";
+                context.Client.LogError(message);
 
                 throw new InvalidOperationException(message);
             }

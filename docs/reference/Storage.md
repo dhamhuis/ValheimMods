@@ -39,6 +39,8 @@ On 2026-11-24, targeted Mono.Cecil method-body inspection of `assembly_valheim.d
 
 This is network-object ownership, distinct from player access permissions. The inspected flow does not make ownership a permanent player claim or restrict transfer to the first open. It does not establish how long ownership lasts after closing, when it may change later, or live multiplayer behavior. BuildFromStorage filters for current local ownership and closed, accessible storage; opening and closing a chest is a possible way to make it eligible, not a guarantee or a prerequisite when it is already locally owned.
 
+FarmFromStorage uses the same local-ownership-only policy through the [shared placement engine](Building.md#shared-hammercultivator-engine---2026-11-24). Its client-specific radius and access/reservation behavior were exercised in stub tests on 2026-11-24; no new ownership RPC or persistence guarantee is introduced.
+
 [StorageCrafting](../../ValheimMods.Common/src/Crafting/StorageCrafting.cs) plans the needed sources, then for each non-owned source sends `InvokeRPC("RPC_RequestOpen", player.GetPlayerID())`. It waits for both a granted response and local `IsOwner()`, with a five-second real-time deadline and ongoing validity checks.
 
 [StorageOwnershipResponsePatch](../../ValheimMods.Common/src/Crafting/StorageOwnershipResponsePatch.cs) routes matching responses into that pending state rather than treating them as ordinary manual chest opens. Late-response guards and [manual-interaction handling](../../ValheimMods.Common/src/Crafting/PendingContainerInteractionPatch.cs) distinguish pending craft responses from a valid later player open.

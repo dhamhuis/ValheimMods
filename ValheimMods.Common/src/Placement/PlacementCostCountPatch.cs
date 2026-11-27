@@ -1,9 +1,9 @@
 using HarmonyLib;
 
-namespace BuildFromStorage;
+namespace ValheimMods.Common.Placement;
 
 [HarmonyPatch(typeof(Inventory), nameof(Inventory.CountItems), typeof(string), typeof(int), typeof(bool))]
-internal static class BuildCostCountPatch
+internal static class PlacementCostCountPatch
 {
     [HarmonyPostfix]
     private static void IncludeStorage(
@@ -13,7 +13,7 @@ internal static class BuildCostCountPatch
         bool matchWorldLevel,
         ref int __result)
     {
-        var context = BuildStorageContext.Current;
+        var context = PlacementStorageContext.Current;
 
         if (context == null || context.RequirementCheckDepth == 0 || context.SuppressCountAugmentation
             || __instance != context.Player.GetInventory())

@@ -1,17 +1,16 @@
 using System.Collections.Generic;
-using UnityEngine;
 
-namespace BuildFromStorage;
+namespace ValheimMods.Common.Placement;
 
-internal static class BuildStorageContext
+internal static class PlacementStorageContext
 {
     private static Scope _current;
 
     internal static Scope Current => _current;
 
-    internal static ScopeToken BeginPlacement(Player player, BuildStorageRegistry registry, float radius)
+    internal static ScopeToken BeginPlacement(Player player)
     {
-        if (player == null || player != Player.m_localPlayer || player.PlacementCostDisabled)
+        if (!PlacementStorage.TryGetClient(player, out var client) || player.PlacementCostDisabled)
         {
             return null;
         }
@@ -22,14 +21,14 @@ internal static class BuildStorageContext
         }
 
         var previous = _current;
-        _current = new Scope(player, registry, radius);
+        _current = new Scope(player, client);
 
         return new ScopeToken(_current, previous, false, true);
     }
 
-    internal static ScopeToken BeginRequirements(Player player, BuildStorageRegistry registry, float radius)
+    internal static ScopeToken BeginRequirements(Player player)
     {
-        if (player == null || player != Player.m_localPlayer || player.PlacementCostDisabled)
+        if (!PlacementStorage.TryGetClient(player, out var client) || player.PlacementCostDisabled)
         {
             return null;
         }
@@ -42,7 +41,7 @@ internal static class BuildStorageContext
         }
 
         var previous = _current;
-        _current = new Scope(player, registry, radius);
+        _current = new Scope(player, client);
         _current.RequirementCheckDepth++;
 
         return new ScopeToken(_current, previous, true, true);
@@ -75,24 +74,25 @@ internal static class BuildStorageContext
 
     internal sealed class Scope
     {
-        private readonly BuildStorageRegistry _registry;
         private readonly float _radius;
         private readonly HashSet<Container> _reservedSet = new();
         private readonly List<Container> _reserved = new();
 
-        internal Scope(Player player, BuildStorageRegistry registry, float radius)
+        internal Scope(Player player, PlacementStorage client)
         {
             Player = player;
-            _registry = registry;
-            _radius = radius;
-            Containers = registry.Find(player, radius);
+            Client = client;
+            _radius = client.Radius;
+            Containers = PlacementStorage.Registry.Find(player, _radius);
         }
 
         internal Player Player { get; }
 
+        internal PlacementStorage Client { get; }
+
         internal List<Container> Containers { get; }
 
-        internal BuildResourcePlan Plan { get; private set; }
+        internal PlacementResourcePlan Plan { get; private set; }
 
         internal bool SuppressCountAugmentation { get; set; }
 
@@ -100,10 +100,10 @@ internal static class BuildStorageContext
 
         internal bool IsAccessible(Container container)
         {
-            return _registry.IsAccessible(container, Player, _radius, _reservedSet.Contains(container));
+            return PlacementStorage.Registry.IsAccessible(container, Player, _radius, _reservedSet.Contains(container));
         }
 
-        internal bool TryReserve(BuildResourcePlan plan)
+        internal bool TryReserve(PlacementResourcePlan plan)
         {
             if (!plan.ValidateStorage(this))
             {

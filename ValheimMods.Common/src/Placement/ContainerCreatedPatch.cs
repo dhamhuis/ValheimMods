@@ -1,10 +1,10 @@
 using HarmonyLib;
 
-namespace BuildFromStorage;
+namespace ValheimMods.Common.Placement;
 
 [HarmonyPatch(typeof(Container), nameof(Container.Awake))]
 internal static class ContainerCreatedPatch
 {
     [HarmonyPostfix]
-    private static void AfterAwake(Container __instance) => BuildFromStoragePlugin.StorageRegistry.Add(__instance);
+    private static void AfterAwake(Container __instance) => PlacementStorage.Registry.Add(__instance);
 }

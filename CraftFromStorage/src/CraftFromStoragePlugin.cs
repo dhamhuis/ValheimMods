@@ -15,7 +15,7 @@ public sealed class CraftFromStoragePlugin : BaseUnityPlugin
 
     // Changing this GUID renames the config file and breaks dependents; keep it stable after release.
     public const string PluginGuid = "hoose.valheim.craftfromstorage";
-    public const string PluginVersion = "1.0.0";
+    public const string PluginVersion = "1.0.1";
 
     private const string StorageRadiusDescription =
         "How far, in meters, CraftFromStorage searches for storage around you (a sphere centred on your character). Allowed range: 1 to 100.\n"

@@ -1,5 +1,7 @@
 using System;
+using TMPro;
 using UnityEngine;
+using ValheimMods.Common;
 using ValheimMods.Testing;
 using static CraftFromStorage.Tests.CraftingTestSetup;
 
@@ -15,6 +17,7 @@ internal static class PatchIntegrationTests
             runner.Run(DiscoveryDoesNotLearnFromStorage);
             runner.Run(RequirementDisplayIncludesStorage);
             runner.Run(BuildingDisplayExcludesStorage);
+        runner.Run(RequirementListClearsSurplusCounts);
             runner.Run(RequirementExceptionRestoresContext);
             runner.Run(AlternativeSelectionFindsStorage);
             runner.Run(TransactionRedirectsIngredientRemoval);
@@ -58,25 +61,74 @@ internal static class PatchIntegrationTests
         check(!player.HaveRequirementItems(recipe, true, 1, 1), "Discovery learned from storage.");
     }
 
-    /// <summary>Crafting requirement display includes storage without leaking inventory-count scope.</summary>
+    /// <summary>Crafting requirement display shows carried and stored counts without leaking inventory-count scope.</summary>
     private static void RequirementDisplayIncludesStorage(Action<bool, string> check)
     {
         var (player, _, recipe, _) = Setup();
+        player.Inventory.Items.Add(Item("wood", 1));
+        var amount = new TMP_Text();
+        var element = new Transform();
+        var amountRect = new RectTransform { anchoredPosition = new Vector2(0f, -10f), rect = new Rect(0f, 0f, 40f, 16f) };
+        element.AddChild(amountRect, "res_amount", amount);
+        InventoryGui.SetupRequirement(element, recipe.m_resources[0], player, true, 1, 1);
+        var labelRect = (RectTransform)element.Find(RequirementAmountText.RaisedCountsLabelName);
+        check(InventoryGui.LastRequirementMet, "Crafting display ignored storage.");
+        check(amount.text == "2", $"Crafting required amount was '{amount.text}'.");
         check(
-            InventoryGui.SetupRequirement(new Transform(), recipe.m_resources[0], player, true, 1, 1),
-            "Crafting display ignored storage.");
+            RequirementAmountText.FindLabel(element)?.text == "1:4",
+            "Crafting display did not show carried and stored counts.");
         check(
-            player.Inventory.CountItems("wood", -1, true) == 0 && CraftingContext.Current == null,
+            labelRect?.anchoredPosition.y == -10f && amountRect.anchoredPosition.y == 6f,
+            "Crafting counts did not take the required amount's place with the amount raised one line.");
+        RequirementAmountText.Clear(element);
+        check(amountRect.anchoredPosition.y == -10f, "Clearing crafting counts did not restore the required amount.");
+        check(
+            player.Inventory.CountItems("wood", -1, true) == 1 && CraftingContext.Current == null,
             "Display finalizer leaked storage counts.");
     }
 
-    /// <summary>Building requirement display remains limited to the player's inventory.</summary>
+    /// <summary>A recipe with fewer requirements clears counts left in surplus slots and restores their amount.</summary>
+    private static void RequirementListClearsSurplusCounts(Action<bool, string> check)
+    {
+        var (player, _, recipe, gui) = Setup();
+        player.Inventory.Items.Add(Item("wood", 1));
+        var first = new Transform();
+        first.AddChild(new RectTransform(), "res_amount", new TMP_Text());
+        var second = new Transform();
+        var secondAmount = new RectTransform { anchoredPosition = new Vector2(0f, -10f), rect = new Rect(0f, 0f, 40f, 16f) };
+        second.AddChild(secondAmount, "res_amount", new TMP_Text());
+        gui.m_recipeRequirementList = [first.gameObject, second.gameObject];
+        var requirement = recipe.m_resources[0];
+        recipe.m_resources = [requirement, requirement];
+
+        gui.ShowSelectedRecipeRequirements(player);
+        check(
+            RequirementAmountText.FindLabel(second)?.text == "1:4" && secondAmount.anchoredPosition.y == 6f,
+            "The second requirement slot did not show raised counts.");
+
+        recipe.m_resources = [requirement];
+        gui.ShowSelectedRecipeRequirements(player);
+        check(
+            RequirementAmountText.FindLabel(second).text.Length == 0 && secondAmount.anchoredPosition.y == -10f,
+            "A surplus requirement slot kept the previous recipe's counts or raised amount.");
+
+        gui.ShowSelectedRecipeRequirements(player);
+        gui.ShowNoRecipeSelected();
+        check(
+            RequirementAmountText.FindLabel(first).text.Length == 0,
+            "Switching to a tab or station with nothing selected kept the previous recipe's counts.");
+    }
+
+    /// <summary>Building requirement display remains vanilla and limited to the player's inventory.</summary>
     private static void BuildingDisplayExcludesStorage(Action<bool, string> check)
     {
         var (player, _, recipe, _) = Setup();
-        check(
-            !InventoryGui.SetupRequirement(new Transform(), recipe.m_resources[0], player, false, 1, 1),
-            "Building display counted storage.");
+        var amount = new TMP_Text();
+        var element = new Transform();
+        element.AddChild("res_amount", amount);
+        InventoryGui.SetupRequirement(element, recipe.m_resources[0], player, false, 1, 1);
+        check(!InventoryGui.LastRequirementMet, "Building display counted storage.");
+        check(amount.text == "2" && RequirementAmountText.FindLabel(element) == null, $"Building display text was '{amount.text}'.");
     }
 
     /// <summary>The requirement finalizer restores scope even when the original method throws.</summary>

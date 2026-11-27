@@ -12,6 +12,7 @@ The [Thunderstore README](Thunderstore/README.md) is the player-facing package p
 - Personal chest and ward permissions remain in force. Open/busy containers and carts in use are excluded.
 - Vanilla station levels, shelter/fire checks, recipe discovery, DLC checks, output capacity, item quality, world-level matching and no-cost modes remain in force.
 - Requirement coloring and craftability checks include eligible storage. Requirements are not automatically learned from chest contents.
+- Requirement counts are shown as the required amount with `inventory:storage` on the line below, for example `5` with `10:42` below (the `5` moves up a line so the counts fit): 5 required, 10 in your inventory, 42 in nearby storage, with the counts line in yellow. A side with none is left blank (`10:` or `:42`), and with none anywhere you see just the vanilla `5`. The required amount stays white, or flashes red when inventory and storage together are short, as in vanilla.
 - Output goes to the player's inventory, never automatically back to storage.
 
 No hand crafting, hammer building, repairs, fueling, automatic machine inputs, stashing, sorting, or new hotkeys.
@@ -65,6 +66,7 @@ Local in-game testing was reported successful for both CraftFromStorage and Auto
 - Test just inside, exactly at and just outside the configured radius (default 20m), including vertically separated storage and diagonal corners outside the sphere.
 - Test workbench, forge, quality upgrades, multi-craft and any available one-of/variable-yield recipes. Food stations must stay vanilla unless CookFromStorage is installed.
 - Test unknown recipes, low-level/wrong/unusable stations, full inventory and no-cost modes. Storage must not bypass vanilla restrictions.
+- Check that requirement counts show the required amount with `inventory:storage` on a yellow line below, leaving a side with none blank and showing only the vanilla amount when neither has any, for normal recipes and upgrades.
 - Test locked personal chests, ward denial, open chests, moving carts and containers destroyed while a request is pending.
 - Test no hand-crafting, hammer-building, machine fueling/input or repair behavior changes. Keep AutoRepair enabled to verify coexistence.
 - With two clients, test remote-owned and simultaneously accessed chests, permission changes, disconnect/timeouts, cancellation and walking out of range while awaiting ownership. After a lost reply, retry crafting and manual opening without reloading; deliver delayed/duplicate replies and verify they do not unexpectedly open a chest or spend ingredients twice.

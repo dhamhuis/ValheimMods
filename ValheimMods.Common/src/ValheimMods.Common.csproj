@@ -40,6 +40,7 @@
     <Reference Include="UnityEngine"><HintPath>$(ValheimManagedDir)\UnityEngine.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UIModule"><HintPath>$(ValheimManagedDir)\UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UI"><HintPath>$(ValheimManagedDir)\UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Unity.TextMeshPro"><HintPath>$(ValheimManagedDir)\Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <Target Name="ValidateBuildReferences" BeforeTargets="ResolveReferences">
     <Error Condition="!Exists('$(ValheimManagedDir)\assembly_valheim.dll')" Text="Valheim managed assemblies not found. Set ValheimInstallDir or ValheimManagedDir." />

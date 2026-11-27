@@ -2,8 +2,10 @@ using System;
 
 namespace UnityEngine;
 
-public class GameObject
+public class GameObject : Object
 {
+    private Transform _transform;
+
     public GameObject()
     {
     }
@@ -13,9 +15,14 @@ public class GameObject
         this.name = name;
     }
 
-    public string name;
+    public bool activeSelf { get; set; }
+
+    public Transform transform => _transform ??= new Transform { gameObject = this };
 
     public Component[] ParentComponents { get; set; } = Array.Empty<Component>();
+
+    public T GetComponent<T>()
+        where T : Component => transform.GetComponent<T>();
 
     public T GetComponentInParent<T>() where T : Component
     {
@@ -28,5 +35,11 @@ public class GameObject
         }
 
         return null;
+    }
+
+    internal void AttachTransform(Transform transform)
+    {
+        _transform = transform;
+        transform.gameObject = this;
     }
 }

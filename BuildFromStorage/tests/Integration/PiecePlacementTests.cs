@@ -1,19 +1,22 @@
 using System;
-using HarmonyLib;
+using System.Collections.Generic;
 using UnityEngine;
+using ValheimMods.Common.Placement;
 using ValheimMods.Testing;
 
 namespace BuildFromStorage.Tests;
 
 internal static class PiecePlacementTests
 {
+    private static readonly List<string> _warnings = new();
+    private static readonly List<string> _errors = new();
+
     internal static void Run(TestRunner runner)
     {
-        var harmony = new Harmony("hoose.valheim.buildfromstorage.tests");
+        using var client = PlacementStorage.Register("Hammer", () => 20f, _warnings.Add, _errors.Add);
 
         try
         {
-            harmony.PatchAll(typeof(PiecePlacementTests).Assembly);
             runner.Run(StorageMaterialsAreScopedAndConsumedInventoryFirst);
             runner.Run(UnownedAndOutOfRangeStorageCannotMeetCosts);
             runner.Run(DuplicateRequirementsCannotDoubleSpendStorage);
@@ -22,11 +25,11 @@ internal static class PiecePlacementTests
         }
         finally
         {
-            harmony.UnpatchSelf();
-            BuildStorageContext.Reset();
+            PlacementStorageContext.Reset();
         }
     }
 
+    /// <summary>Build costs include storage only in requirement scopes and consume inventory before nearest storage.</summary>
     private static void StorageMaterialsAreScopedAndConsumedInventoryFirst(Action<bool, string> check)
     {
         var setup = CreateSetup();
@@ -51,6 +54,7 @@ internal static class PiecePlacementTests
         check(!setup.Near.m_inUse && !setup.Far.m_inUse, "Storage remained reserved after placement.");
     }
 
+    /// <summary>Remote-owned and out-of-range storage cannot satisfy Hammer costs.</summary>
     private static void UnownedAndOutOfRangeStorageCannotMeetCosts(Action<bool, string> check)
     {
         var setup = CreateSetup();
@@ -64,6 +68,7 @@ internal static class PiecePlacementTests
         check(setup.Player.Inventory.CountItems("Stone", -1, true) == 0, "Storage was counted outside the scoped requirement check.");
     }
 
+    /// <summary>Duplicate resources are allocated once and insufficient totals block placement without spending.</summary>
     private static void DuplicateRequirementsCannotDoubleSpendStorage(Action<bool, string> check)
     {
         var setup = CreateSetup();
@@ -77,9 +82,10 @@ internal static class PiecePlacementTests
         check(setup.Player.PlacedPieces == 0, "Insufficient duplicate resources allowed a piece to be placed.");
         check(setup.Player.Inventory.CountItems("Stone", -1, true) == 1, "The failed placement consumed player materials.");
         check(setup.Near.GetInventory().CountItems("Stone", -1, true) == 2, "The failed placement consumed storage materials.");
-        check(BuildFromStoragePlugin.Warnings.Count > 0, "The blocked placement did not report the resource-plan failure.");
+        check(_warnings.Count > 0, "The blocked placement did not report the resource-plan failure.");
     }
 
+    /// <summary>No-placement-cost mode leaves storage contents and reservations unchanged.</summary>
     private static void NoPlacementCostDoesNotConsumeStorage(Action<bool, string> check)
     {
         var setup = CreateSetup();
@@ -94,6 +100,7 @@ internal static class PiecePlacementTests
         check(!setup.Near.m_inUse, "No-placement-cost mode reserved storage.");
     }
 
+    /// <summary>Free-build mode preserves storage while allowing placement.</summary>
     private static void FreeBuildDoesNotReserveOrConsumeStorage(Action<bool, string> check)
     {
         var setup = CreateSetup();
@@ -110,23 +117,24 @@ internal static class PiecePlacementTests
 
     private static SetupResult CreateSetup()
     {
-        BuildStorageContext.Reset();
-        BuildFromStoragePlugin.Warnings.Clear();
-        BuildFromStoragePlugin.Errors.Clear();
-        BuildFromStoragePlugin.StorageRadius = 20f;
-        BuildFromStoragePlugin.StorageRegistry = new BuildStorageRegistry();
+        PlacementStorageContext.Reset();
+        PlacementStorage.Registry.Clear();
+        _warnings.Clear();
+        _errors.Clear();
         Time.frameCount++;
         ZoneSystem.instance.NoCost = false;
 
         var player = Player.m_localPlayer = new Player();
+        player.RightItem = new ItemDrop.ItemData();
+        player.RightItem.m_dropPrefab.name = "Hammer";
         var piece = new Piece();
         player.SelectedPiece = piece;
         var near = new Container();
         var far = new Container();
         near.transform.position = new Vector3(5f, 0f, 0f);
         far.transform.position = new Vector3(10f, 0f, 0f);
-        BuildFromStoragePlugin.StorageRegistry.Add(near);
-        BuildFromStoragePlugin.StorageRegistry.Add(far);
+        PlacementStorage.Registry.Add(near);
+        PlacementStorage.Registry.Add(far);
 
         return new SetupResult(player, piece, near, far);
     }

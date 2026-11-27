@@ -1,7 +1,7 @@
 {
     "name": "CraftFromStorage",
     "description": "Craft and upgrade at stations using accessible nearby storage.",
-    "version_number": "1.0.0",
+    "version_number": "1.0.1",
     "website_url": "https://github.com/dhamhuis/ValheimMods",
     "dependencies": ["denikson-BepInExPack_Valheim-5.4.2360"]
 }

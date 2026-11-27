@@ -21,6 +21,7 @@ By Hoose.
 - Includes non-food station recipes and equipment upgrades; ingredients may be split across several containers.
 - Respects chest ownership, wards and normal recipe/station rules. Busy storage is skipped.
 - Crafting requirement colors include available storage materials. Crafted output stays in your inventory.
+- Requirement counts are shown as the required amount with `inventory:storage` on the line below, for example `5` with `10:42` below (the `5` moves up a line so the counts fit): 5 required, 10 in your inventory, 42 in nearby storage, with the counts line in yellow. A side with none is left blank (`10:` or `:42`), and with none anywhere you see just the vanilla `5`. The required amount stays white, or flashes red when inventory and storage together are short, as in vanilla.
 - Storage owned by another player may add a short delay while ownership is requested. Missing, denied or unresponsive storage cancels crafting without spending ingredients.
 
 Does **not** add hand crafting from storage, hammer building, auto-repair, fueling, automatic cooking/processing, sorting, or stashing. No hotkeys are needed.

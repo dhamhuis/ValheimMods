@@ -22,6 +22,7 @@ By Hoose.
 
 - Keep ingredients in accessible storage within **20 meters of your player** (configurable from 1 to 100 meters).
 - Use stations normally. Recipe ingredient counts include nearby storage; press **E** to add one accepted ingredient to a rack, oven or empty Fermenter.
+- Recipe requirement counts are shown as the required amount with `inventory:storage` on the line below, for example `5` with `10:42` below (the `5` moves up a line so the counts fit): 5 required, 10 in your inventory, 42 in nearby storage, with the counts line in yellow. A side with none is left blank (`10:` or `:42`), and with none anywhere you see just the vanilla `5`. The required amount stays white, or flashes red when inventory and storage together are short, as in vanilla.
 - Multi-input cooking stations and Fermenters support **F8** selection, automatic priorities and **Never auto-add** exclusions. Priorities choose a type across inventory and storage; inventory is used first within that type.
 - Collect cooked food and finished mead normally. Collection does not also load another ingredient.
 - Normal recipes, station requirements, fire, shelter, capacity and storage permissions still apply. Busy or inaccessible storage is skipped.

@@ -8,14 +8,8 @@
   <ItemGroup>
     <Compile Include="..\..\ValheimMods.Common\src\ContainerRegistry.cs" Link="Production\ContainerRegistry.cs" />
     <Compile Include="..\..\ValheimMods.Common\src\StorageRange.cs" Link="Production\StorageRange.cs" />
-    <Compile Include="..\src\BuildStorageRegistry.cs" Link="Production\BuildStorageRegistry.cs" />
-    <Compile Include="..\src\BuildStorageContext.cs" Link="Production\BuildStorageContext.cs" />
-    <Compile Include="..\src\BuildResourcePlan.cs" Link="Production\BuildResourcePlan.cs" />
-    <Compile Include="..\src\BuildPlacementContextPatch.cs" Link="Production\BuildPlacementContextPatch.cs" />
-    <Compile Include="..\src\BuildRequirementPatch.cs" Link="Production\BuildRequirementPatch.cs" />
-    <Compile Include="..\src\BuildCostCountPatch.cs" Link="Production\BuildCostCountPatch.cs" />
-    <Compile Include="..\src\BuildCostPlanPatch.cs" Link="Production\BuildCostPlanPatch.cs" />
-    <Compile Include="..\src\BuildCostConsumePatch.cs" Link="Production\BuildCostConsumePatch.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\RequirementAmountText.cs" Link="Production\RequirementAmountText.cs" />
+    <Compile Include="..\..\ValheimMods.Common\src\Placement\*.cs" Link="Production\Placement\%(Filename)%(Extension)" />
     <ProjectReference Include="..\..\tests\ValheimMods.Testing\ValheimMods.Testing.csproj" />
     <PackageReference Include="HarmonyX" Version="2.16.1" />
   </ItemGroup>

@@ -19,6 +19,8 @@ dotnet build .\ValheimMods.sln --configuration Release
 .\AutoRepair\scripts\build.ps1
 .\WorldClock\scripts\build.ps1
 .\CraftFromStorage\scripts\build.ps1
+.\BuildFromStorage\scripts\build.ps1
+.\FarmFromStorage\scripts\build.ps1
 .\CookFromStorage\scripts\build.ps1
 .\SupplyFromStorage\scripts\build.ps1
 ```
@@ -121,6 +123,22 @@ dotnet run --project .\CraftFromStorage\tests\CraftFromStorage.Tests.csproj --co
 ```
 
 Run `.\CraftFromStorage\scripts\pack.ps1` only after review and testing are complete, not on each iteration. Deployment targets `BepInEx/plugins/CraftFromStorage/`; the prepared package includes `ValheimMods.Common.dll` beside the plugin.
+
+## FarmFromStorage and BuildFromStorage
+
+```powershell
+.\FarmFromStorage\scripts\build.ps1
+.\BuildFromStorage\scripts\build.ps1
+dotnet run --project .\FarmFromStorage\tests\FarmFromStorage.Tests.csproj --configuration Release
+dotnet run --project .\BuildFromStorage\tests\BuildFromStorage.Tests.csproj --configuration Release
+.\scripts\Validate-ModPatches.ps1 -ModDirectory .\FarmFromStorage
+.\scripts\Validate-ModPatches.ps1 -ModDirectory .\BuildFromStorage
+.\scripts\Render-ModIcon.ps1 -ModDirectory .\FarmFromStorage
+```
+
+These plugins register disjoint Cultivator/Hammer clients in `ValheimMods.Common.Placement.PlacementStorage`, sharing one verified patch set and nearest-first storage registry. Each client retains its own radius callback. Unloading one leaves the other active. Older BuildFromStorage builds with standalone placement patches are rejected when FarmFromStorage loads; use the current development BuildFromStorage DLL rather than its old prepared ZIP. Replace all installed common DLL copies together.
+
+No in-game planting or shared-engine Hammer regression is established by stub tests. Follow [FarmFromStorage's step-by-step checklist](../FarmFromStorage/TESTING.md) and the [pending Hammer regression](../BuildFromStorage/TESTING.md#shared-placement-engine-regression---pending). Build wrappers prepare test DLLs; use `-Deploy` only for an intentional profile installation. Defer `.\FarmFromStorage\scripts\pack.ps1` and the next BuildFromStorage package until the applicable tests are satisfactory.
 
 ## WorldClock
 
